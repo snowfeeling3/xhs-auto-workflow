@@ -78,7 +78,7 @@ cp .env.example .env
 编辑 `.env`：
 
 ```env
-DOMAIN=xhs.sn0wpear.com       # 生产域名（本地开发可忽略）
+DOMAIN=your-domain.com          # 生产域名（本地开发可忽略）
 LLM_API_KEY=sk-your-api-key-here
 LLM_BASE_URL=https://api.deepseek.com
 LLM_MODEL=deepseek-v4-pro
@@ -147,50 +147,11 @@ bash scripts/backup.sh             # 备份数据库
 bash scripts/deploy.sh             # 一键重新部署
 ```
 
-## 多服务域名管理
-
-基于 `sn0wpear.com` 的子域名划分策略，每个项目一个独立子域名。
-
-### 推荐命名规范
-
-| 子域名 | 用途 | 项目路径 |
-|--------|------|----------|
-| `sn0wpear.com` | 个人主页 / 导航页 | `/srv/apps/homepage` |
-| `xhs.sn0wpear.com` | AI 小红书生成器（本项目） | `/srv/apps/xhs-auto-workflow` |
-| `blog.sn0wpear.com` | 个人博客 | `/srv/apps/blog` |
-| `works.sn0wpear.com` | 作品集 | `/srv/apps/portfolio` |
-
-> 命名模式：`{用途}.sn0wpear.com`，短而直接
-
-### 设计原则
-
-1. **一项目一子域名** — 每个 SaaS/站点独立子域名，互不干扰
-2. **域名在 `.env` 管** — 修改 `DOMAIN=` 即可切换，无需手动改 nginx
-3. **nginx 模板自动注入** — `default.conf.template` 用 `${DOMAIN}` 占位，`docker compose up` 时 `envsubst` 自动替换
-4. **主域名做导航** — `sn0wpear.com` 放一个简洁的个人页，链接到各子站
-
-### 新增项目时只需 4 步
-
-```bash
-# 1. DNS 添加 A 记录
-#    类型 A | 名称 xhs | 值 你的服务器IP
-
-# 2. 克隆项目
-cd /srv/apps
-git clone <repo-url> new-project
-cd new-project
-
-# 3. 配置域名
-echo "DOMAIN=new.sn0wpear.com" >> .env
-
-# 4. 启动
-docker compose up -d
-```
-
 ## 配置说明
 
 | 环境变量 | 说明 | 默认值 |
 |----------|------|--------|
+| `DOMAIN` | 部署域名 | - |
 | `LLM_API_KEY` | DeepSeek API 密钥 | - |
 | `LLM_BASE_URL` | API 地址 | `https://api.deepseek.com` |
 | `LLM_MODEL` | 模型名称 | `deepseek-v4-pro` |
