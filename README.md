@@ -75,9 +75,10 @@ pip install -r requirements.txt
 cp .env.example .env
 ```
 
-编辑 `.env`，填入 API Key：
+编辑 `.env`：
 
 ```env
+DOMAIN=xhs-auto.tools.sn0wpear.com  # 生产域名（本地开发可忽略）
 LLM_API_KEY=sk-your-api-key-here
 LLM_BASE_URL=https://api.deepseek.com
 LLM_MODEL=deepseek-v4-pro
@@ -99,28 +100,41 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ### 前置条件
 
 - Ubuntu 22.04 LTS + Docker & Docker Compose
-- 域名已解析 + ICP 备案
+- 域名已解析到服务器 IP + ICP 备案
 
 ### 部署步骤
 
 ```bash
-# 1. 克隆项目
+# 1. 克隆到规范路径
 cd /srv/apps
 git clone https://github.com/snowfeeling3/xhs-auto-workflow.git
 cd xhs-auto-workflow
 
-# 2. 配置环境变量（生产用 PostgreSQL）
+# 2. 配置（域名 + API Key + PostgreSQL）
 cp .env.example .env
-nano .env  # 填入 API Key，取消注释 PostgreSQL 和 Redis 配置
+nano .env
+# 必填：DOMAIN、LLM_API_KEY
+# 生产启用：DATABASE_URL（PostgreSQL）、REDIS_URL
 
-# 3. 配置 Nginx 域名
-sed -i 's/your-domain.com/你的域名/g' nginx/default.conf
-
-# 4. 启动所有服务
+# 3. 启动（nginx 自动从模板读取 DOMAIN 生成配置）
 docker compose up -d
 
-# 5. 查看状态
+# 4. 查看状态
 docker compose ps
+```
+
+### 申请 SSL 证书
+
+```bash
+# HTTP 服务跑起来后，用 certbot 申请证书
+docker compose exec nginx certbot certonly --webroot \
+  -w /var/www/certbot \
+  -d $(grep DOMAIN .env | cut -d= -f2) \
+  --email admin@你的邮箱.com --agree-tos
+
+# 取消注释 nginx/default.conf.template 中 HTTPS server 块
+# 然后重启
+docker compose restart nginx
 ```
 
 ### 运维命令
@@ -129,9 +143,49 @@ docker compose ps
 docker compose ps                  # 查看服务状态
 docker compose logs -f app         # 实时日志
 docker compose restart app         # 重启应用
-docker compose exec app python -c "from app.database import init_db; init_db()"  # 初始化数据库
 bash scripts/backup.sh             # 备份数据库
-bash scripts/deploy.sh             # 重新部署（拉代码 + 重建）
+bash scripts/deploy.sh             # 一键重新部署
+```
+
+## 多服务域名管理
+
+基于 `sn0wpear.com` 的子域名划分策略，每个项目一个独立子域名。
+
+### 推荐命名规范
+
+| 子域名 | 用途 | 项目路径 |
+|--------|------|----------|
+| `sn0wpear.com` | 个人主页 / 导航页 | `/srv/apps/homepage` |
+| `xhs-auto.tools.sn0wpear.com` | AI 小红书生成器（本项目） | `/srv/apps/xhs-auto-workflow` |
+| `blog.notes.sn0wpear.com` | 个人博客 | `/srv/apps/blog` |
+| `works.folio.sn0wpear.com` | 作品集 | `/srv/apps/portfolio` |
+
+> 命名模式：`{服务名}.{分类}.sn0wpear.com`
+> 分类示例：`tools`（SaaS 工具）、`notes`（博客/文档）、`folio`（作品展示）
+
+### 设计原则
+
+1. **一项目一子域名** — 每个 SaaS/站点独立子域名，互不干扰
+2. **域名在 `.env` 管** — 修改 `DOMAIN=` 即可切换，无需手动改 nginx
+3. **nginx 模板自动注入** — `default.conf.template` 用 `${DOMAIN}` 占位，`docker compose up` 时 `envsubst` 自动替换
+4. **主域名做导航** — `sn0wpear.com` 放一个简洁的个人页，链接到各子站
+
+### 新增项目时只需 4 步
+
+```bash
+# 1. DNS 添加 A 记录
+#    类型 A | 名称 xhs | 值 你的服务器IP
+
+# 2. 克隆项目
+cd /srv/apps
+git clone <repo-url> new-project
+cd new-project
+
+# 3. 配置域名
+echo "DOMAIN=new.sn0wpear.com" >> .env
+
+# 4. 启动
+docker compose up -d
 ```
 
 ## 配置说明

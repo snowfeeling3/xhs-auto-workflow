@@ -24,6 +24,9 @@ build/
 .venv/
 venv/
 
+# Nginx（从模板生成）
+nginx/default.conf
+
 # Docker
 *.log
 
