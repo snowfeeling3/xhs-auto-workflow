@@ -78,7 +78,7 @@ cp .env.example .env
 编辑 `.env`：
 
 ```env
-DOMAIN=xhs-auto.tools.sn0wpear.com  # 生产域名（本地开发可忽略）
+DOMAIN=xhs.sn0wpear.com       # 生产域名（本地开发可忽略）
 LLM_API_KEY=sk-your-api-key-here
 LLM_BASE_URL=https://api.deepseek.com
 LLM_MODEL=deepseek-v4-pro
@@ -156,12 +156,11 @@ bash scripts/deploy.sh             # 一键重新部署
 | 子域名 | 用途 | 项目路径 |
 |--------|------|----------|
 | `sn0wpear.com` | 个人主页 / 导航页 | `/srv/apps/homepage` |
-| `xhs-auto.tools.sn0wpear.com` | AI 小红书生成器（本项目） | `/srv/apps/xhs-auto-workflow` |
-| `blog.notes.sn0wpear.com` | 个人博客 | `/srv/apps/blog` |
-| `works.folio.sn0wpear.com` | 作品集 | `/srv/apps/portfolio` |
+| `xhs.sn0wpear.com` | AI 小红书生成器（本项目） | `/srv/apps/xhs-auto-workflow` |
+| `blog.sn0wpear.com` | 个人博客 | `/srv/apps/blog` |
+| `works.sn0wpear.com` | 作品集 | `/srv/apps/portfolio` |
 
-> 命名模式：`{服务名}.{分类}.sn0wpear.com`
-> 分类示例：`tools`（SaaS 工具）、`notes`（博客/文档）、`folio`（作品展示）
+> 命名模式：`{用途}.sn0wpear.com`，短而直接
 
 ### 设计原则
 
