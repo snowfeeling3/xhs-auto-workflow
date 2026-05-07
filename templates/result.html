@@ -1,0 +1,114 @@
+{% extends "layout.html" %}
+{% block title %}{{ post.title }}{% endblock %}
+
+{% block content %}
+<!-- Back nav -->
+<a href="/" style="display:inline-flex;align-items:center;gap:0.35rem;color:var(--text-muted);text-decoration:none;font-size:0.85rem;font-weight:500;letter-spacing:0.03em;padding:2rem 0 1rem;transition:color 0.2s;"
+   onmouseenter="this.style.color='var(--text-primary)'"
+   onmouseleave="this.style.color='var(--text-muted)'">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5m7-7l-7 7 7 7"/></svg>
+    返回首页
+</a>
+
+<!-- Article card -->
+<article class="card animate-fade-in-up stagger-1" style="overflow:hidden;margin-bottom:1.25rem;">
+    <!-- Header bar -->
+    <header style="padding:1.5rem 2rem;border-bottom:1px solid var(--border-subtle);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;">
+        <div style="display:flex;align-items:center;gap:0.75rem;">
+            <h1 style="font-size:1.1rem;font-weight:700;letter-spacing:0.03em;margin:0;">生成结果</h1>
+            <span class="badge
+                {% if post.risk_level == 'low' %}badge-low
+                {% elif post.risk_level == 'medium' %}badge-medium
+                {% else %}badge-high{% endif %}">
+                {% if post.risk_level == 'low' %}低风险
+                {% elif post.risk_level == 'medium' %}中风险
+                {% else %}高风险{% endif %}
+            </span>
+        </div>
+        <div style="display:flex;gap:0.5rem;">
+            <button id="copy-btn" class="btn-ghost"
+                data-copy-title="{{ post.title | e }}"
+                data-copy-content="{{ post.content | e }}">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                <span id="copy-text">一键复制</span>
+            </button>
+            <a href="/" class="btn-accent" style="font-size:0.85rem;padding:0.55rem 1.1rem;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 7.2h7.6l-6 4.8 2.4 7.2-6.4-4.8-6.4 4.8 2.4-7.2-6-4.8h7.6z"/></svg>
+                再生成一篇
+            </a>
+        </div>
+    </header>
+
+    <!-- Content body -->
+    <div style="padding:2rem;">
+        <!-- Title section -->
+        <section style="margin-bottom:2rem;">
+            <span class="section-label">标题</span>
+            <h2 style="font-size:1.5rem;font-weight:700;line-height:1.4;letter-spacing:-0.01em;margin:0.35rem 0 0;">{{ post.title }}</h2>
+        </section>
+
+        <hr class="hr-fade" style="margin-bottom:2rem;">
+
+        <!-- Body section -->
+        <section style="margin-bottom:2rem;">
+            <span class="section-label">正文</span>
+            <div style="margin-top:0.35rem;color:var(--text-secondary);line-height:1.85;font-size:0.95rem;white-space:pre-wrap;letter-spacing:0.01em;">{{ post.content }}</div>
+        </section>
+
+        {% if tags %}
+        <hr class="hr-fade" style="margin-bottom:1.5rem;">
+
+        <!-- Tags section -->
+        <section>
+            <span class="section-label">标签</span>
+            <div style="margin-top:0.5rem;display:flex;flex-wrap:wrap;gap:0.4rem;">
+                {% for tag in tags.split('#') %}
+                    {% set t = tag.strip() %}
+                    {% if t %}
+                    <span class="content-tag">#{{ t }}</span>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+    </div>
+</article>
+
+<!-- Timestamp -->
+<div style="text-align:center;padding-bottom:2rem;">
+    <p style="font-size:0.8rem;color:var(--text-muted);letter-spacing:0.03em;font-feature-settings:'tnum';">
+        生成时间：{{ post.created_at.strftime('%Y-%m-%d %H:%M') if post.created_at else '' }}
+    </p>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function() {
+    var copyBtn = document.getElementById('copy-btn');
+    var copyText = document.getElementById('copy-text');
+
+    copyBtn.addEventListener('click', function() {
+        var title = copyBtn.getAttribute('data-copy-title');
+        var content = copyBtn.getAttribute('data-copy-content');
+        var text = title + '\n\n' + content;
+
+        navigator.clipboard.writeText(text).then(function() {
+            copyText.textContent = '已复制';
+            copyBtn.style.color = 'var(--green-text)';
+            copyBtn.style.borderColor = 'rgba(52,211,153,0.3)';
+            copyBtn.style.background = 'var(--green-subtle)';
+
+            setTimeout(function() {
+                copyText.textContent = '一键复制';
+                copyBtn.style.color = '';
+                copyBtn.style.borderColor = '';
+                copyBtn.style.background = '';
+            }, 2000);
+        }).catch(function() {
+            alert('复制失败，请手动复制');
+        });
+    });
+})();
+</script>
+{% endblock %}

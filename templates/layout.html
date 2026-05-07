@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AI 小红书爆款生成器{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.1/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #09090B;
+            --bg-surface: #131316;
+            --bg-card: #1A1A1F;
+            --bg-card-hover: #1F1F25;
+            --border-subtle: #252530;
+            --border-active: #3A3A48;
+            --text-primary: #EDEDF0;
+            --text-secondary: #8E8E98;
+            --text-muted: #5C5C68;
+            --accent: #FF2442;
+            --accent-glow: rgba(255, 36, 66, 0.15);
+            --accent-solid: #E01E3A;
+            --green-subtle: rgba(52, 211, 153, 0.12);
+            --green-text: #6EE7B7;
+            --amber-subtle: rgba(251, 191, 36, 0.12);
+            --amber-text: #FCD34D;
+            --radius-sm: 0.5rem;
+            --radius-md: 0.75rem;
+            --radius-lg: 1rem;
+            --radius-xl: 1.25rem;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+            background-color: var(--bg-deep);
+            color: var(--text-primary);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Grain texture overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.035;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-size: 256px 256px;
+        }
+
+        /* Ambient glow */
+        body::after {
+            content: '';
+            position: fixed;
+            top: -30%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 800px;
+            height: 600px;
+            z-index: 0;
+            pointer-events: none;
+            background: radial-gradient(ellipse at center, var(--accent-glow) 0%, transparent 70%);
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border-active); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+        /* Selection */
+        ::selection {
+            background: rgba(255, 36, 66, 0.3);
+            color: var(--text-primary);
+        }
+
+        /* Animations */
+        @keyframes fade-in-up {
+            from { opacity: 0; transform: translateY(24px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fade-in {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+        @keyframes pulse-dot {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50%      { transform: scale(1.35); opacity: 1; }
+        }
+        @keyframes shimmer {
+            0%   { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        @keyframes border-glow {
+            0%, 100% { border-color: var(--border-subtle); }
+            50%      { border-color: rgba(255, 36, 66, 0.35); }
+        }
+        .animate-fade-in-up {
+            animation: fade-in-up 0.6s ease-out both;
+        }
+        .animate-fade-in {
+            animation: fade-in 0.5s ease-out both;
+        }
+
+        /* Stagger delays */
+        .stagger-1 { animation-delay: 0.05s; }
+        .stagger-2 { animation-delay: 0.12s; }
+        .stagger-3 { animation-delay: 0.19s; }
+        .stagger-4 { animation-delay: 0.26s; }
+        .stagger-5 { animation-delay: 0.33s; }
+
+        /* Primary button */
+        .btn-accent {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            background: var(--accent);
+            color: #fff;
+            font-weight: 600;
+            font-size: 1rem;
+            padding: 0.8rem 1.75rem;
+            border-radius: var(--radius-md);
+            border: none;
+            cursor: pointer;
+            letter-spacing: 0.02em;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+            text-decoration: none;
+        }
+        .btn-accent::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.08) 50%, transparent 60%);
+            background-size: 200% 100%;
+            animation: shimmer 3s infinite;
+        }
+        .btn-accent:hover {
+            background: var(--accent-solid);
+            box-shadow: 0 0 24px var(--accent-glow);
+            transform: translateY(-1px);
+        }
+        .btn-accent:active {
+            transform: translateY(0);
+            box-shadow: none;
+        }
+        .btn-accent:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        /* Ghost button */
+        .btn-ghost {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: transparent;
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 0.875rem;
+            padding: 0.6rem 1.1rem;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-subtle);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            letter-spacing: 0.02em;
+        }
+        .btn-ghost:hover {
+            color: var(--text-primary);
+            border-color: var(--border-active);
+            background: var(--bg-card-hover);
+        }
+
+        /* Card base */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-xl);
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            border-color: var(--border-active);
+            background: var(--bg-card-hover);
+        }
+
+        /* Input field */
+        .input-dark {
+            width: 100%;
+            padding: 0.85rem 1.1rem;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.2s ease;
+            letter-spacing: 0.01em;
+        }
+        .input-dark::placeholder {
+            color: var(--text-muted);
+        }
+        .input-dark:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        /* Tag pills */
+        .tag-pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid var(--border-subtle);
+            background: var(--bg-surface);
+            color: var(--text-secondary);
+            letter-spacing: 0.02em;
+            user-select: none;
+        }
+        .tag-pill:hover {
+            color: var(--text-primary);
+            border-color: var(--accent);
+            background: var(--accent-glow);
+            transform: translateY(-1px);
+        }
+        .tag-pill:active {
+            transform: translateY(0);
+        }
+
+        /* Risk badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+        .badge-low    { background: var(--green-subtle); color: var(--green-text); }
+        .badge-medium { background: var(--amber-subtle); color: var(--amber-text); }
+        .badge-high   { background: var(--accent-glow); color: var(--accent); }
+
+        /* Content tag */
+        .content-tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.35rem 0.85rem;
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            background: rgba(255, 36, 66, 0.08);
+            color: var(--accent);
+            letter-spacing: 0.02em;
+            transition: all 0.2s ease;
+        }
+        .content-tag:hover {
+            background: var(--accent-glow);
+        }
+
+        /* Divider */
+        .hr-fade {
+            border: none;
+            height: 1px;
+            background: linear-gradient(to right, transparent, var(--border-subtle), transparent);
+        }
+
+        /* Loading dots */
+        .loading-dots {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .loading-dots span {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+            animation: pulse-dot 1.4s ease-in-out infinite;
+        }
+        .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+        /* Section label */
+        .section-label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Responsive container */
+        .container-narrow {
+            width: 100%;
+            max-width: 44rem;
+            margin: 0 auto;
+            padding: 0 1.25rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        @media (min-width: 640px) {
+            .container-narrow { padding: 0 1.5rem; }
+        }
+    </style>
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <div class="container-narrow">
+        {% block content %}{% endblock %}
+    </div>
+    <footer style="text-align:center;padding:2.5rem 1rem;color:var(--text-muted);font-size:0.8rem;letter-spacing:0.03em;position:relative;z-index:1;">
+        <p>AI 小红书爆款生成器 <span style="color:var(--border-active);margin:0 0.4rem;">·</span> 让创作更简单</p>
+    </footer>
+    {% block scripts %}{% endblock %}
+</body>
+</html>
