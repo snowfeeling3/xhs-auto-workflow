@@ -1,3 +1,4 @@
+import os
 import warnings
 warnings.filterwarnings("ignore", message=".*allowed_objects.*")
 
@@ -8,15 +9,18 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from jinja2 import Environment, FileSystemLoader
 
-from database import init_db, get_db
-from services.content_service import ContentService
-from models.post import Post
+from app.database import init_db, get_db
+from app.services.content_service import ContentService
+from app.models.post import Post
+
+STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
+TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), "templates")
 
 app = FastAPI(title="AI小红书爆款生成器")
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
-jinja_env = Environment(loader=FileSystemLoader("templates"))
+jinja_env = Environment(loader=FileSystemLoader(TEMPLATE_DIR))
 
 content_service = ContentService()
 

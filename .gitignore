@@ -6,6 +6,14 @@
 *.db-journal
 *.db-wal
 
+# 日志
+logs/*
+!logs/.gitkeep
+
+# 用户上传
+uploads/*
+!uploads/.gitkeep
+
 # Python
 __pycache__/
 *.pyc
@@ -15,6 +23,9 @@ dist/
 build/
 .venv/
 venv/
+
+# Docker
+*.log
 
 # Claude Code
 .claude/

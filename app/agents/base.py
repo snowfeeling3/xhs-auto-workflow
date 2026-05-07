@@ -3,11 +3,10 @@ from pathlib import Path
 from langchain.agents import create_agent
 from langchain_openai import ChatOpenAI
 
-import config
+from app import config
 
 
 class BaseAgent:
-    """所有 Agent 的基类，封装 LLM 初始化、Agent 构建和通用 run() 方法"""
 
     def __init__(self, llm: ChatOpenAI | None = None):
         self._llm = llm or self._create_llm()

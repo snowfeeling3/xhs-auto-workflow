@@ -1,21 +1,20 @@
 import re
-from datetime import datetime, date
+from datetime import date
 
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 
 from langchain_openai import ChatOpenAI
 
-import config
-from agents.topic_agent import TopicAgent
-from agents.content_agent import ContentAgent
-from agents.optimize_agent import OptimizeAgent
-from agents.risk_agent import RiskAgent
-from models.post import Post
+from app import config
+from app.agents.topic_agent import TopicAgent
+from app.agents.content_agent import ContentAgent
+from app.agents.optimize_agent import OptimizeAgent
+from app.agents.risk_agent import RiskAgent
+from app.models.post import Post
 
 
 def _parse_content(text: str) -> dict:
-    """从 Agent 输出中解析标题、正文、标签"""
     title_match = re.search(r"标题[：:]\s*(.+?)(?:\n|$)", text)
     title = title_match.group(1).strip() if title_match else ""
 
@@ -39,7 +38,6 @@ def _parse_content(text: str) -> dict:
 
 
 def _parse_risk(text: str) -> dict:
-    """从 risk_agent 输出中解析风险等级和说明"""
     level = "low"
     note = ""
 
@@ -77,35 +75,29 @@ class ContentService:
             return {"error": f"今日免费次数已用完（每日 {config.FREE_DAILY_LIMIT} 次），请明天再来"}
 
         try:
-            # 1. 选题
             topic_agent = TopicAgent(llm=self._llm)
             topic_result = topic_agent.run(
                 f"请为以下领域生成爆款选题：{topic}"
             )
 
-            # 2. 生成文案
             content_agent = ContentAgent(llm=self._llm)
             content_result = content_agent.run(
                 f"请根据以下选题信息，创作一篇完整的小红书笔记文案：\n{topic_result}"
             )
 
-            # 3. 优化
             optimize_agent = OptimizeAgent(llm=self._llm)
             optimized = optimize_agent.run(
                 f"请优化以下小红书文案，提升爆款潜力：\n{content_result}"
             )
 
-            # 4. 风险检测
             risk_agent = RiskAgent(llm=self._llm)
             risk_result = risk_agent.run(
                 f"请检测以下内容的风险等级：\n{optimized}"
             )
 
-            # 解析结果
             parsed = _parse_content(optimized)
             risk = _parse_risk(risk_result)
 
-            # 存入数据库
             post = Post(
                 topic=topic,
                 title=parsed["title"],
@@ -127,7 +119,6 @@ class ContentService:
 
         except Exception as e:
             msg = str(e)
-            # 从错误消息中移除可能的敏感信息
             for sensitive in [config.LLM_API_KEY, "api_key", "Authorization"]:
                 if sensitive and sensitive in msg:
                     msg = msg.replace(sensitive, "***")

@@ -16,51 +16,52 @@
 |------|------|
 | 后端框架 | FastAPI + Uvicorn |
 | AI 引擎 | LangChain Agent + DeepSeek API |
-| 数据库 | SQLAlchemy + SQLite |
+| 数据库 | SQLAlchemy + SQLite（开发）/ PostgreSQL（生产） |
+| 缓存 | Redis（生产） |
 | 前端 | Jinja2 模板 + TailwindCSS (CDN) |
+| 部署 | Docker Compose + Nginx |
 | 样式 | 暗色编辑风格，纯 CSS 动画 |
 
 ## 项目结构
 
 ```
-├── main.py                     # FastAPI 入口，路由定义
-├── config.py                   # 环境变量配置
-├── database.py                 # 数据库连接与会话管理
-├── requirements.txt            # Python 依赖清单
+├── app/                         # 应用代码
+│   ├── main.py                  # FastAPI 入口，路由定义
+│   ├── config.py                # 环境变量配置
+│   ├── database.py              # 数据库连接与会话管理
+│   ├── agents/                  # LangChain Agent 层
+│   │   ├── base.py              # Agent 基类
+│   │   ├── topic_agent.py       # 选题策划 Agent
+│   │   ├── content_agent.py     # 文案生成 Agent
+│   │   ├── optimize_agent.py    # 爆款优化 Agent
+│   │   └── risk_agent.py        # 风险检测 Agent
+│   ├── services/                # 业务服务层
+│   │   └── content_service.py   # 生成流程编排
+│   ├── models/                  # 数据模型
+│   │   └── post.py
+│   ├── prompts/                 # Agent 系统提示词
+│   ├── templates/               # Jinja2 前端模板
+│   └── static/                  # 静态资源
 │
-├── agents/                     # LangChain Agent 层
-│   ├── base.py                 # Agent 基类（LLM 初始化、构建、运行）
-│   ├── topic_agent.py          # 选题策划 Agent
-│   ├── content_agent.py        # 文案生成 Agent
-│   ├── optimize_agent.py       # 爆款优化 Agent
-│   └── risk_agent.py           # 风险检测 Agent
+├── nginx/
+│   └── default.conf             # Nginx 反向代理配置
 │
-├── prompts/                    # Agent 系统提示词
-│   ├── topic.txt               # 选题策划师提示词
-│   ├── content.txt             # 文案写手提示词
-│   ├── optimize.txt            # 优化专家提示词
-│   └── risk.txt                # 审核专家提示词
+├── scripts/
+│   ├── deploy.sh                # 生产部署脚本
+│   ├── backup.sh                # 数据库备份脚本
+│   └── migrate.sh               # 数据库迁移脚本
 │
-├── services/                   # 业务服务层
-│   └── content_service.py      # 生成流程编排、结果解析、限额检查
-│
-├── models/                     # 数据模型
-│   └── post.py                 # Post SQLAlchemy 模型
-│
-├── templates/                  # Jinja2 前端模板
-│   ├── layout.html             # 基础布局（暗色编辑风格）
-│   ├── index.html              # 首页（输入、快速标签、功能卡片）
-│   └── result.html             # 结果页（杂志式阅读布局）
-│
-├── static/                     # 静态资源（预留）
-│   ├── css/style.css
-│   └── js/main.js
-│
-├── .env.example                # 环境变量模板
-└── .gitignore                  # Git 忽略规则
+├── logs/                        # 日志目录
+├── uploads/                     # 用户上传目录
+├── docker-compose.yml           # Docker 服务编排
+├── Dockerfile                   # 应用容器镜像
+├── .dockerignore
+├── .env.example
+├── requirements.txt
+└── README.md
 ```
 
-## 快速开始
+## 快速开始（本地开发）
 
 ### 1. 安装依赖
 
@@ -68,13 +69,13 @@
 pip install -r requirements.txt
 ```
 
-### 2. 配置 API Key
+### 2. 配置
 
 ```bash
 cp .env.example .env
 ```
 
-编辑 `.env` 文件，填入你的 API Key：
+编辑 `.env`，填入 API Key：
 
 ```env
 LLM_API_KEY=sk-your-api-key-here
@@ -85,15 +86,53 @@ DATABASE_URL=sqlite:///./xhs.db
 FREE_DAILY_LIMIT=3
 ```
 
-> `.env` 已加入 `.gitignore`，不会被提交到版本控制。
-
-### 3. 启动服务
+### 3. 启动
 
 ```bash
-python main.py
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-访问 `http://localhost:8000` 即可使用。
+访问 `http://localhost:8000`。
+
+## 生产部署（Docker Compose）
+
+### 前置条件
+
+- Ubuntu 22.04 LTS + Docker & Docker Compose
+- 域名已解析 + ICP 备案
+
+### 部署步骤
+
+```bash
+# 1. 克隆项目
+cd /srv/apps
+git clone https://github.com/snowfeeling3/xhs-auto-workflow.git
+cd xhs-auto-workflow
+
+# 2. 配置环境变量（生产用 PostgreSQL）
+cp .env.example .env
+nano .env  # 填入 API Key，取消注释 PostgreSQL 和 Redis 配置
+
+# 3. 配置 Nginx 域名
+sed -i 's/your-domain.com/你的域名/g' nginx/default.conf
+
+# 4. 启动所有服务
+docker compose up -d
+
+# 5. 查看状态
+docker compose ps
+```
+
+### 运维命令
+
+```bash
+docker compose ps                  # 查看服务状态
+docker compose logs -f app         # 实时日志
+docker compose restart app         # 重启应用
+docker compose exec app python -c "from app.database import init_db; init_db()"  # 初始化数据库
+bash scripts/backup.sh             # 备份数据库
+bash scripts/deploy.sh             # 重新部署（拉代码 + 重建）
+```
 
 ## 配置说明
 
@@ -102,18 +141,19 @@ python main.py
 | `LLM_API_KEY` | DeepSeek API 密钥 | - |
 | `LLM_BASE_URL` | API 地址 | `https://api.deepseek.com` |
 | `LLM_MODEL` | 模型名称 | `deepseek-v4-pro` |
-| `LLM_TEMPERATURE` | 生成温度 (0-1) | `0.7` |
+| `LLM_TEMPERATURE` | 生成温度 | `0.7` |
 | `DATABASE_URL` | 数据库连接 | `sqlite:///./xhs.db` |
+| `REDIS_URL` | Redis 地址（生产） | - |
 | `FREE_DAILY_LIMIT` | 每日免费次数 | `3` |
 
-> 如使用其他 OpenAI 兼容 API（如通义千问、智谱 GLM），修改 `LLM_BASE_URL` 和 `LLM_MODEL` 即可。
+> 兼容 OpenAI 格式的 API（如通义千问、智谱 GLM），修改 `LLM_BASE_URL` 和 `LLM_MODEL` 即可。
 
 ## API 端点
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
 | `GET` | `/` | 首页 |
-| `POST` | `/generate` | 生成文案（Body: `{"topic": "内容方向"}`） |
+| `POST` | `/generate` | 生成文案（Body: `{"topic": "..."}`） |
 | `GET` | `/result/{post_id}` | 查看生成结果 |
 
 ## License
