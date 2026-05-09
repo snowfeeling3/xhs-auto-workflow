@@ -27,6 +27,10 @@ content_service = ContentService()
 
 class GenerateRequest(BaseModel):
     topic: str
+    description: str = ""
+    style: str = ""
+    length: str = ""
+    tone: str = ""
 
 
 @app.on_event("startup")
@@ -42,7 +46,14 @@ def index(request: Request):
 
 @app.post("/generate")
 def generate(req: GenerateRequest, db: Session = Depends(get_db)):
-    result = content_service.generate(req.topic, db)
+    result = content_service.generate(
+        topic=req.topic,
+        db=db,
+        description=req.description,
+        style=req.style,
+        length=req.length,
+        tone=req.tone,
+    )
     return result
 
 

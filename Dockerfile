@@ -5,14 +5,16 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-# 系统依赖
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
+# 系统依赖（upgrade 修补 CVE）
+RUN apt-get update && apt-get upgrade -y --no-install-recommends \
+    && apt-get install -y --no-install-recommends curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Python 依赖
+# Python 依赖（国内用阿里云镜像加速）
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -i https://mirrors.aliyun.com/pypi/simple/ \
+    --trusted-host mirrors.aliyun.com \
+    -r requirements.txt
 
 # 项目代码
 COPY . .

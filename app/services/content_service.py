@@ -70,20 +70,42 @@ class ContentService:
             extra_body={"thinking": {"type": "disabled"}},
         )
 
-    def generate(self, topic: str, db: Session) -> dict:
+    def generate(
+        self, topic: str, db: Session,
+        description: str = "",
+        style: str = "",
+        length: str = "",
+        tone: str = "",
+    ) -> dict:
         if not _check_daily_limit(db):
             return {"error": f"今日免费次数已用完（每日 {config.FREE_DAILY_LIMIT} 次），请明天再来"}
 
+        # 构建用户需求上下文字段
+        extra_parts = []
+        if style:
+            extra_parts.append(f"笔记类型：{style}")
+        if length:
+            extra_parts.append(f"文案长度：{length}")
+        if tone:
+            extra_parts.append(f"语言风格：{tone}")
+        extra_context = "\n".join(extra_parts)
+
         try:
+            topic_prompt = f"请为以下领域生成爆款选题：{topic}"
+            if description:
+                topic_prompt += f"\n\n用户对内容方向的具体描述（参考此描述来精准定位选题）：\n{description}"
+            if extra_context:
+                topic_prompt += f"\n\n附加要求：\n{extra_context}"
+
             topic_agent = TopicAgent(llm=self._llm)
-            topic_result = topic_agent.run(
-                f"请为以下领域生成爆款选题：{topic}"
-            )
+            topic_result = topic_agent.run(topic_prompt)
+
+            content_prompt = f"请根据以下选题信息，创作一篇完整的小红书笔记文案：\n{topic_result}"
+            if extra_context:
+                content_prompt += f"\n\n请严格遵循以下要求：\n{extra_context}"
 
             content_agent = ContentAgent(llm=self._llm)
-            content_result = content_agent.run(
-                f"请根据以下选题信息，创作一篇完整的小红书笔记文案：\n{topic_result}"
-            )
+            content_result = content_agent.run(content_prompt)
 
             optimize_agent = OptimizeAgent(llm=self._llm)
             optimized = optimize_agent.run(

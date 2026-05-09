@@ -32,7 +32,7 @@
         * { box-sizing: border-box; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+            font-family: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", serif;
             background-color: var(--bg-deep);
             color: var(--text-primary);
             min-height: 100vh;
@@ -47,40 +47,42 @@
             inset: 0;
             z-index: 0;
             pointer-events: none;
-            opacity: 0.035;
+            opacity: 0.04;
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
             background-size: 256px 256px;
         }
 
-        /* Ambient glow */
+        /* Ambient glow — top red, bottom subtle */
         body::after {
             content: '';
             position: fixed;
             top: -30%;
             left: 50%;
             transform: translateX(-50%);
-            width: 800px;
-            height: 600px;
+            width: 900px;
+            height: 650px;
             z-index: 0;
             pointer-events: none;
-            background: radial-gradient(ellipse at center, var(--accent-glow) 0%, transparent 70%);
+            background:
+                radial-gradient(ellipse at 50% 0%, var(--accent-glow) 0%, transparent 70%),
+                radial-gradient(ellipse at 50% 100%, rgba(138, 138, 160, 0.04) 0%, transparent 50%);
         }
 
         /* Custom scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: var(--border-active); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb { background: var(--border-active); border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 
         /* Selection */
         ::selection {
-            background: rgba(255, 36, 66, 0.3);
-            color: var(--text-primary);
+            background: rgba(255, 36, 66, 0.25);
+            color: #fff;
         }
 
-        /* Animations */
+        /* ── Animations ── */
         @keyframes fade-in-up {
-            from { opacity: 0; transform: translateY(24px); }
+            from { opacity: 0; transform: translateY(28px); }
             to   { opacity: 1; transform: translateY(0); }
         }
         @keyframes fade-in {
@@ -88,32 +90,44 @@
             to   { opacity: 1; }
         }
         @keyframes pulse-dot {
-            0%, 100% { transform: scale(1); opacity: 0.5; }
-            50%      { transform: scale(1.35); opacity: 1; }
+            0%, 100% { transform: scale(1); opacity: 0.4; }
+            50%      { transform: scale(1.4); opacity: 1; }
         }
         @keyframes shimmer {
             0%   { background-position: -200% 0; }
             100% { background-position: 200% 0; }
         }
-        @keyframes border-glow {
-            0%, 100% { border-color: var(--border-subtle); }
-            50%      { border-color: rgba(255, 36, 66, 0.35); }
+        @keyframes breathe {
+            0%, 100% { box-shadow: 0 0 0 0 var(--accent-glow); }
+            50%      { box-shadow: 0 0 0 8px transparent; }
         }
+        @keyframes copy-flash {
+            0%   { background: var(--green-subtle); }
+            100% { background: transparent; }
+        }
+        @keyframes scale-in {
+            from { transform: scale(0.92); opacity: 0; }
+            to   { transform: scale(1); opacity: 1; }
+        }
+
         .animate-fade-in-up {
-            animation: fade-in-up 0.6s ease-out both;
+            animation: fade-in-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
         }
         .animate-fade-in {
             animation: fade-in 0.5s ease-out both;
         }
+        .animate-scale-in {
+            animation: scale-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
 
         /* Stagger delays */
-        .stagger-1 { animation-delay: 0.05s; }
-        .stagger-2 { animation-delay: 0.12s; }
-        .stagger-3 { animation-delay: 0.19s; }
-        .stagger-4 { animation-delay: 0.26s; }
-        .stagger-5 { animation-delay: 0.33s; }
+        .stagger-1 { animation-delay: 0.04s; }
+        .stagger-2 { animation-delay: 0.10s; }
+        .stagger-3 { animation-delay: 0.16s; }
+        .stagger-4 { animation-delay: 0.22s; }
+        .stagger-5 { animation-delay: 0.28s; }
 
-        /* Primary button */
+        /* ── Primary button ── */
         .btn-accent {
             display: inline-flex;
             align-items: center;
@@ -122,41 +136,44 @@
             background: var(--accent);
             color: #fff;
             font-weight: 600;
-            font-size: 1rem;
+            font-size: 0.95rem;
             padding: 0.8rem 1.75rem;
             border-radius: var(--radius-md);
             border: none;
             cursor: pointer;
-            letter-spacing: 0.02em;
-            transition: all 0.2s ease;
+            letter-spacing: 0.04em;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
             position: relative;
             overflow: hidden;
             text-decoration: none;
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
         }
         .btn-accent::after {
             content: '';
             position: absolute;
             inset: 0;
-            background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.08) 50%, transparent 60%);
+            background: linear-gradient(135deg, transparent 35%, rgba(255,255,255,0.06) 48%, transparent 65%);
             background-size: 200% 100%;
-            animation: shimmer 3s infinite;
+            animation: shimmer 4s infinite;
         }
         .btn-accent:hover {
             background: var(--accent-solid);
-            box-shadow: 0 0 24px var(--accent-glow);
+            box-shadow: 0 4px 28px var(--accent-glow), 0 1px 4px rgba(0,0,0,0.3);
             transform: translateY(-1px);
         }
         .btn-accent:active {
-            transform: translateY(0);
+            transform: translateY(0) scale(0.985);
             box-shadow: none;
+            transition-duration: 0.08s;
         }
         .btn-accent:disabled {
-            opacity: 0.5;
+            opacity: 0.4;
             cursor: not-allowed;
             pointer-events: none;
+            filter: grayscale(0.3);
         }
 
-        /* Ghost button */
+        /* ── Ghost button ── */
         .btn-ghost {
             display: inline-flex;
             align-items: center;
@@ -164,34 +181,42 @@
             background: transparent;
             color: var(--text-secondary);
             font-weight: 500;
-            font-size: 0.875rem;
+            font-size: 0.85rem;
             padding: 0.6rem 1.1rem;
             border-radius: var(--radius-sm);
             border: 1px solid var(--border-subtle);
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
             text-decoration: none;
-            letter-spacing: 0.02em;
+            letter-spacing: 0.03em;
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
         }
         .btn-ghost:hover {
             color: var(--text-primary);
             border-color: var(--border-active);
-            background: var(--bg-card-hover);
+            background: rgba(255,255,255,0.03);
+            transform: translateY(-1px);
+        }
+        .btn-ghost:active {
+            transform: translateY(0) scale(0.985);
+            transition-duration: 0.08s;
         }
 
-        /* Card base */
+        /* ── Card ── */
         .card {
             background: var(--bg-card);
             border: 1px solid var(--border-subtle);
             border-radius: var(--radius-xl);
-            transition: all 0.3s ease;
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
         }
         .card:hover {
             border-color: var(--border-active);
             background: var(--bg-card-hover);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
         }
 
-        /* Input field */
+        /* ── Input ── */
         .input-dark {
             width: 100%;
             padding: 0.85rem 1.1rem;
@@ -201,109 +226,195 @@
             color: var(--text-primary);
             font-size: 0.95rem;
             outline: none;
-            transition: all 0.2s ease;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
             letter-spacing: 0.01em;
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
         }
         .input-dark::placeholder {
             color: var(--text-muted);
+            font-style: italic;
+            opacity: 0.7;
         }
         .input-dark:focus {
             border-color: var(--accent);
-            box-shadow: 0 0 0 3px var(--accent-glow);
+            box-shadow: 0 0 0 3px var(--accent-glow), 0 0 20px rgba(255,36,66,0.06);
         }
 
-        /* Tag pills */
+        textarea.input-dark {
+            font-family: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "PingFang SC", serif;
+            font-style: normal;
+        }
+        textarea.input-dark::placeholder {
+            font-style: normal;
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+        }
+
+        /* ── Tag pills ── */
         .tag-pill {
             display: inline-flex;
             align-items: center;
-            padding: 0.5rem 1rem;
+            padding: 0.5rem 1.05rem;
             border-radius: 100px;
             font-size: 0.85rem;
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
             border: 1px solid var(--border-subtle);
             background: var(--bg-surface);
             color: var(--text-secondary);
-            letter-spacing: 0.02em;
+            letter-spacing: 0.03em;
             user-select: none;
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+            position: relative;
         }
         .tag-pill:hover {
             color: var(--text-primary);
-            border-color: var(--accent);
-            background: var(--accent-glow);
+            border-color: rgba(255,36,66,0.4);
+            background: rgba(255,36,66,0.06);
             transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
         }
         .tag-pill:active {
-            transform: translateY(0);
+            transform: scale(0.96);
+            transition-duration: 0.08s;
+        }
+        .tag-pill.tag-selected {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+            font-weight: 600;
+            box-shadow: 0 2px 12px var(--accent-glow);
+            animation: scale-in 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+        .tag-pill.tag-selected:hover {
+            background: var(--accent-solid);
+            border-color: var(--accent-solid);
+            box-shadow: 0 4px 18px var(--accent-glow);
         }
 
-        /* Risk badges */
+        /* ── Risk badges ── */
         .badge {
             display: inline-flex;
             align-items: center;
-            padding: 0.25rem 0.75rem;
+            padding: 0.28rem 0.8rem;
             border-radius: 100px;
-            font-size: 0.75rem;
+            font-size: 0.72rem;
             font-weight: 600;
-            letter-spacing: 0.04em;
+            letter-spacing: 0.05em;
             text-transform: uppercase;
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
         }
-        .badge-low    { background: var(--green-subtle); color: var(--green-text); }
-        .badge-medium { background: var(--amber-subtle); color: var(--amber-text); }
-        .badge-high   { background: var(--accent-glow); color: var(--accent); }
+        .badge::before {
+            content: '';
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            margin-right: 0.45rem;
+        }
+        .badge-low    {
+            background: var(--green-subtle);
+            color: var(--green-text);
+        }
+        .badge-low::before {
+            background: var(--green-text);
+            box-shadow: 0 0 6px rgba(110,231,183,0.5);
+        }
+        .badge-medium {
+            background: var(--amber-subtle);
+            color: var(--amber-text);
+        }
+        .badge-medium::before {
+            background: var(--amber-text);
+            box-shadow: 0 0 6px rgba(252,211,77,0.5);
+        }
+        .badge-high   {
+            background: var(--accent-glow);
+            color: var(--accent);
+        }
+        .badge-high::before {
+            background: var(--accent);
+            box-shadow: 0 0 6px var(--accent-glow);
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
 
-        /* Content tag */
+        /* ── Content tag ── */
         .content-tag {
             display: inline-flex;
             align-items: center;
-            padding: 0.35rem 0.85rem;
+            padding: 0.4rem 0.9rem;
             border-radius: 100px;
-            font-size: 0.8rem;
+            font-size: 0.82rem;
             font-weight: 500;
-            background: rgba(255, 36, 66, 0.08);
+            background: rgba(255, 36, 66, 0.06);
             color: var(--accent);
             letter-spacing: 0.02em;
-            transition: all 0.2s ease;
+            transition: all 0.22s ease;
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+            border: 1px solid transparent;
         }
         .content-tag:hover {
             background: var(--accent-glow);
+            border-color: rgba(255,36,66,0.2);
         }
 
-        /* Divider */
+        /* ── Divider ── */
         .hr-fade {
             border: none;
             height: 1px;
-            background: linear-gradient(to right, transparent, var(--border-subtle), transparent);
+            background: linear-gradient(to right, transparent, var(--border-subtle) 20%, var(--border-subtle) 80%, transparent);
         }
 
-        /* Loading dots */
+        /* ── Loading dots ── */
         .loading-dots {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 7px;
         }
         .loading-dots span {
-            width: 8px;
-            height: 8px;
+            width: 9px;
+            height: 9px;
             border-radius: 50%;
             background: var(--accent);
             animation: pulse-dot 1.4s ease-in-out infinite;
         }
-        .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
-        .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+        .loading-dots span:nth-child(2) { animation-delay: 0.18s; }
+        .loading-dots span:nth-child(3) { animation-delay: 0.36s; }
 
-        /* Section label */
+        /* ── Section label ── */
         .section-label {
-            font-size: 0.7rem;
+            font-size: 0.68rem;
             font-weight: 600;
-            letter-spacing: 0.12em;
+            letter-spacing: 0.14em;
             text-transform: uppercase;
             color: var(--text-muted);
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.45rem;
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .section-label::after {
+            content: '';
+            display: inline-block;
+            height: 1px;
+            width: 2rem;
+            background: var(--border-active);
+            flex-shrink: 0;
         }
 
-        /* Responsive container */
+        /* ── Group separator (form sections) ── */
+        .form-group {
+            padding: 0.25rem 0;
+            transition: all 0.25s ease;
+        }
+        .form-group + .form-group {
+            border-top: 1px solid var(--border-subtle);
+            padding-top: 1.3rem;
+            margin-top: 0.1rem;
+        }
+
+        /* ── Responsive container ── */
         .container-narrow {
             width: 100%;
             max-width: 44rem;
@@ -313,8 +424,63 @@
             z-index: 1;
         }
 
+        /* ── Back link ── */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            letter-spacing: 0.03em;
+            padding: 2rem 0 1rem;
+            transition: all 0.22s ease;
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+        }
+        .back-link:hover {
+            color: var(--text-primary);
+            gap: 0.6rem;
+        }
+        .back-link svg {
+            transition: transform 0.22s ease;
+        }
+        .back-link:hover svg {
+            transform: translateX(-3px);
+        }
+
+        /* ── Article typography ── */
+        .article-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            line-height: 1.35;
+            letter-spacing: -0.01em;
+            color: var(--text-primary);
+        }
+        .article-body {
+            color: var(--text-secondary);
+            line-height: 1.9;
+            font-size: 0.95rem;
+            white-space: pre-wrap;
+            letter-spacing: 0.01em;
+            font-family: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "PingFang SC", serif;
+        }
+
+        /* ── Feature card number ── */
+        .feature-num {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent);
+            font-feature-settings: 'tnum';
+            min-width: 2rem;
+            font-family: "SF Mono", "Cascadia Code", "Fira Code", monospace;
+            opacity: 0.8;
+        }
+
         @media (min-width: 640px) {
             .container-narrow { padding: 0 1.5rem; }
+            .article-title { font-size: 1.8rem; }
+            .article-body { font-size: 1rem; }
         }
     </style>
     {% block head %}{% endblock %}
@@ -323,8 +489,8 @@
     <div class="container-narrow">
         {% block content %}{% endblock %}
     </div>
-    <footer style="text-align:center;padding:2.5rem 1rem;color:var(--text-muted);font-size:0.8rem;letter-spacing:0.03em;position:relative;z-index:1;">
-        <p>AI 小红书爆款生成器 <span style="color:var(--border-active);margin:0 0.4rem;">·</span> 让创作更简单</p>
+    <footer style="text-align:center;padding:2.5rem 1rem;color:var(--text-muted);font-size:0.78rem;letter-spacing:0.04em;position:relative;z-index:1;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;">
+        <p>AI 小红书爆款生成器 <span style="color:var(--border-active);margin:0 0.5rem;">·</span> 让创作更简单</p>
     </footer>
     {% block scripts %}{% endblock %}
 </body>
