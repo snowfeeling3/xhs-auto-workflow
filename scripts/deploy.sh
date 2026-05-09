@@ -4,7 +4,7 @@
 # ============================================
 set -e
 
-PROJECT_DIR="/opt/xhs-auto-workflow"
+PROJECT_DIR="/srv/apps/xhs-auto-workflow"
 
 log()  { echo "[$(date '+%H:%M:%S')] $1"; }
 
@@ -21,11 +21,8 @@ fi
 log "拉取最新代码..."
 git pull origin master
 
-log "构建镜像..."
-docker compose build --pull
-
-log "重启服务..."
-docker compose up -d
+log "重建并启动..."
+docker compose up -d --build
 
 log "清理旧镜像..."
 docker image prune -f

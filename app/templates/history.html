@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+{% block title %}历史记录{% endblock %}
+
+{% block content %}
+<a href="/" class="back-link">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5m7-7l-7 7 7 7"/></svg>
+    返回首页
+</a>
+<h1 style="font-size:1.3rem;font-weight:700;margin:1.5rem 0;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;">历史生成记录</h1>
+
+{% if posts %}
+    {% for p in posts %}
+    <a href="/result/{{ p.id }}" style="text-decoration:none;color:inherit;">
+        <div class="card" style="padding:1.2rem 1.5rem;margin-bottom:0.75rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;">
+            <div style="flex:1;min-width:0;">
+                <div style="font-size:0.95rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;">{{ p.title or '无标题' }}</div>
+                <div style="font-size:0.78rem;color:var(--text-muted);margin-top:0.25rem;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;">主题：{{ p.topic }} &nbsp;·&nbsp; {{ p.created_at.strftime('%Y-%m-%d %H:%M') if p.created_at else '' }}</div>
+            </div>
+            <span class="badge {% if p.risk_level == 'low' %}badge-low{% elif p.risk_level == 'medium' %}badge-medium{% else %}badge-high{% endif %}">
+                {{ p.risk_level }}
+            </span>
+        </div>
+    </a>
+    {% endfor %}
+{% else %}
+    <p style="color:var(--text-muted);text-align:center;padding:3rem 0;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;">还没有生成记录，去首页创作第一篇吧。</p>
+{% endif %}
+{% endblock %}

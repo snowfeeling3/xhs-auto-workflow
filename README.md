@@ -8,7 +8,11 @@
 - **AI 创作** — ContentAgent 根据选题创作完整小红书文案
 - **爆款优化** — OptimizeAgent 优化标题吸引力与正文互动率
 - **合规检测** — RiskAgent 自动检测敏感内容并标注风险等级（低/中/高）
-- **精细控制** — 可选指定笔记类型、文案长度、语言风格，以及自由描述内容方向，产出更精准
+- **精细控制** — 可选指定笔记类型、文案长度、语言风格，支持自定义输入任意风格和类型
+- **配图建议** — AI 在正文中自动标注 [插入图片：描述] 位置，结果页渲染为配图建议卡片
+- **热搜榜单** — 每日 8:00 自动生成小红书社区热搜话题，首页表格展示，点击话题一键填入
+- **历史记录** — 查看过往生成记录，支持一键复制和同主题再生成
+- **轻量排版** — 结果页支持粗体、段落、图片卡片等 Markdown 风格渲染
 - **每日限额** — 可配置免费使用次数，防止滥用
 
 ## 技术栈
@@ -42,7 +46,16 @@
 │   │   └── post.py
 │   ├── prompts/                 # Agent 系统提示词
 │   ├── templates/               # Jinja2 前端模板
+│   │   ├── index.html           # 首页（含热搜榜单）
+│   │   ├── result.html          # 结果页（含配图卡片）
+│   │   └── history.html         # 历史记录页
 │   └── static/                  # 静态资源
+│
+├── scripts/
+│   ├── deploy.sh                # 生产部署脚本
+│   ├── backup.sh                # 数据库备份脚本
+│   ├── migrate.sh               # 数据库迁移脚本
+│   └── fetch_trending.py        # 每日热搜话题抓取
 │
 ├── nginx/
 │   └── default.conf             # Nginx 反向代理配置
@@ -146,6 +159,10 @@ docker compose logs -f app         # 实时日志
 docker compose restart app         # 重启应用
 bash scripts/backup.sh             # 备份数据库
 bash scripts/deploy.sh             # 一键重新部署
+python scripts/fetch_trending.py   # 手动抓取今日热搜话题
+
+# 服务器上设置每日 8:00 自动抓取热搜
+(crontab -l 2>/dev/null; echo "0 8 * * * cd /srv/apps/xhs-auto-workflow && python scripts/fetch_trending.py >> logs/trending.log 2>&1") | crontab -
 ```
 
 ## 配置说明
@@ -167,9 +184,11 @@ bash scripts/deploy.sh             # 一键重新部署
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
-| `GET` | `/` | 首页 |
+| `GET` | `/` | 首页（含热搜榜单） |
 | `POST` | `/generate` | 生成文案（见下方请求格式） |
-| `GET` | `/result/{post_id}` | 查看生成结果 |
+| `GET` | `/result/{post_id}` | 查看生成结果（含配图卡片 + 字数统计） |
+| `GET` | `/history` | 历史生成记录 |
+| `GET` | `/api/trending` | 今日热搜话题 JSON |
 
 ### POST /generate 请求格式
 

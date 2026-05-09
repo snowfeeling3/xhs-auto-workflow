@@ -23,19 +23,31 @@
                 {% else %}高风险{% endif %}
             </span>
         </div>
-        <div style="display:flex;gap:0.5rem;">
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
             <button id="copy-btn" class="btn-ghost"
                 data-copy-title="{{ post.title | e }}"
                 data-copy-content="{{ post.content | e }}">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
                 <span id="copy-text">一键复制</span>
             </button>
+            <a href="/?topic={{ post.topic | urlencode }}" class="btn-ghost" style="font-size:0.85rem;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+                再生成同主题
+            </a>
             <a href="/" class="btn-accent" style="font-size:0.85rem;padding:0.55rem 1.1rem;">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 7.2h7.6l-6 4.8 2.4 7.2-6.4-4.8-6.4 4.8 2.4-7.2-6-4.8h7.6z"/></svg>
-                再生成一篇
+                新创作
             </a>
         </div>
     </header>
+
+    <!-- Stats row -->
+    <div class="stats-row" style="padding:0.75rem 2rem 0;border-bottom:1px solid var(--border-subtle);">
+        <span>标题 {{ title_len }} 字</span>
+        <span>正文 {{ content_len }} 字</span>
+        <span>标签 {{ tag_count }} 个</span>
+        <span>配图 {{ post.content.count('[插入图片') + post.content.count('[插入图像') }} 张</span>
+    </div>
 
     <!-- Content body -->
     <div style="padding:2rem;">
@@ -50,21 +62,18 @@
         <!-- Body section -->
         <section style="margin-bottom:2rem;">
             <span class="section-label">正文</span>
-            <div class="article-body" style="margin-top:0.5rem;">{{ post.content }}</div>
+            <div class="article-body" style="margin-top:0.5rem;">{{ content_html | safe }}</div>
         </section>
 
-        {% if tags %}
+        {% if tags_list %}
         <hr class="hr-fade" style="margin-bottom:1.5rem;">
 
         <!-- Tags section -->
         <section>
             <span class="section-label" style="margin-bottom:0.6rem;">标签</span>
             <div style="display:flex;flex-wrap:wrap;gap:0.4rem;">
-                {% for tag in tags.split('#') %}
-                    {% set t = tag.strip() %}
-                    {% if t %}
+                {% for t in tags_list %}
                     <span class="content-tag">#{{ t }}</span>
-                    {% endif %}
                 {% endfor %}
             </div>
         </section>
@@ -72,11 +81,15 @@
     </div>
 </article>
 
-<!-- Timestamp -->
-<div style="text-align:center;padding-bottom:2rem;">
+<!-- Timestamp + nav -->
+<div style="text-align:center;padding-bottom:2rem;display:flex;flex-direction:column;align-items:center;gap:0.5rem;">
     <p style="font-size:0.78rem;color:var(--text-muted);letter-spacing:0.04em;font-feature-settings:'tnum';font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;">
         生成时间：{{ post.created_at.strftime('%Y-%m-%d %H:%M') if post.created_at else '' }}
     </p>
+    <a href="/history" style="font-size:0.75rem;color:var(--text-muted);text-decoration:none;transition:color 0.2s;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;"
+       onmouseenter="this.style.color='var(--text-primary)'" onmouseleave="this.style.color='var(--text-muted)'">
+        查看历史记录 →
+    </a>
 </div>
 {% endblock %}
 
@@ -85,7 +98,6 @@
 (function() {
     var copyBtn = document.getElementById('copy-btn');
     var copyText = document.getElementById('copy-text');
-    var originalHTML = copyBtn.innerHTML;
 
     copyBtn.addEventListener('click', function() {
         var title = copyBtn.getAttribute('data-copy-title');

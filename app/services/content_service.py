@@ -52,6 +52,28 @@ def _parse_risk(text: str) -> dict:
     return {"risk_level": level, "risk_note": note}
 
 
+def _parse_image_suggestions(text: str) -> list:
+    """Extract [插入图片：description] markers."""
+    pattern = r'\[插入图片[：:]\s*(.+?)\]'
+    return [m.group(1).strip() for m in re.finditer(pattern, text)]
+
+
+def _format_content_html(text: str) -> str:
+    """Convert basic markdown and image markers to HTML."""
+    # Bold
+    text = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', text)
+    # Image placeholders
+    text = re.sub(
+        r'\[插入图片[：:]\s*(.+?)\]',
+        r'<div class="image-card"><div class="image-card-icon">&#128247;</div><div class="image-card-desc">\1</div></div>',
+        text,
+    )
+    # Paragraphs
+    paragraphs = text.split('\n\n')
+    text = ''.join(f'<p>{p.replace(chr(10), "<br>")}</p>' if p.strip() else '' for p in paragraphs)
+    return text
+
+
 def _check_daily_limit(db: Session) -> bool:
     today = date.today()
     count = db.query(func.count(Post.id)).filter(
@@ -119,6 +141,8 @@ class ContentService:
 
             parsed = _parse_content(optimized)
             risk = _parse_risk(risk_result)
+            images = _parse_image_suggestions(parsed["body"])
+            tags_list = [t.strip() for t in parsed["tags"].split("#") if t.strip()]
 
             post = Post(
                 topic=topic,
@@ -135,6 +159,8 @@ class ContentService:
                 "title": parsed["title"],
                 "content": parsed["body"],
                 "tags": parsed["tags"],
+                "tags_list": tags_list,
+                "image_count": len(images),
                 "risk_level": risk["risk_level"],
                 "risk_note": risk["risk_note"],
             }

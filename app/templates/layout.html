@@ -477,6 +477,131 @@
             opacity: 0.8;
         }
 
+        /* ── Image suggestion card ── */
+        .image-card {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.9rem;
+            padding: 1rem 1.2rem;
+            margin: 1rem 0;
+            background: linear-gradient(135deg, rgba(138,138,160,0.06), rgba(138,138,160,0.02));
+            border: 1px dashed var(--border-active);
+            border-radius: var(--radius-md);
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+            transition: border-color 0.2s;
+        }
+        .image-card:hover {
+            border-color: var(--accent);
+            border-style: solid;
+        }
+        .image-card-icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+            line-height: 1;
+        }
+        .image-card-desc {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            line-height: 1.55;
+            letter-spacing: 0.02em;
+        }
+        .image-card-desc::before {
+            content: "配图建议：";
+            display: block;
+            font-weight: 700;
+            font-size: 0.72rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            margin-bottom: 0.25rem;
+        }
+
+        /* ── Custom tag input ── */
+        .custom-tag-input {
+            font-size: 0.85rem !important;
+            padding: 0.55rem 0.9rem !important;
+            margin-top: 0.5rem;
+        }
+
+        /* ── Toggle custom button ── */
+        .toggle-custom-btn {
+            font-size: 0.76rem !important;
+            padding: 0.3rem 0.8rem !important;
+            color: var(--text-muted) !important;
+            margin-top: 0.35rem;
+            transition: color 0.2s !important;
+        }
+        .toggle-custom-btn:hover {
+            color: var(--accent) !important;
+        }
+
+        /* ── Article body paragraphs ── */
+        .article-body p {
+            margin: 0.5rem 0;
+        }
+        .article-body strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        /* ── Stats row ── */
+        .stats-row {
+            display: flex;
+            gap: 1rem;
+            padding: 0.25rem 0 0.5rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+            flex-wrap: wrap;
+        }
+        .stats-row span {
+            letter-spacing: 0.03em;
+            font-feature-settings: 'tnum';
+        }
+
+        /* ── Trending table ── */
+        .trending-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+        }
+        .trending-table thead th {
+            text-align: left;
+            padding: 0.5rem 0.75rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.7rem;
+            letter-spacing: 0.08em;
+            white-space: nowrap;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        .trending-table tbody td {
+            padding: 0.65rem 0.75rem;
+            border-bottom: 1px solid var(--border-subtle);
+            transition: background 0.15s;
+        }
+        .trending-table tbody tr:hover {
+            background: rgba(255,255,255,0.02);
+        }
+        .trending-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        .trending-rank-hot {
+            color: var(--accent);
+            font-weight: 700;
+            font-feature-settings: 'tnum';
+        }
+        .trending-topic-name {
+            font-weight: 600;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: color 0.15s;
+        }
+        .trending-topic-name:hover {
+            color: var(--accent);
+        }
+
         @media (min-width: 640px) {
             .container-narrow { padding: 0 1.5rem; }
             .article-title { font-size: 1.8rem; }

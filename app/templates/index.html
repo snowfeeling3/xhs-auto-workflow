@@ -18,6 +18,33 @@
     </p>
 </section>
 
+<!-- Trending Topics -->
+<section id="trending-section" class="animate-fade-in-up stagger-3" style="margin-bottom:1.5rem;display:none;">
+    <div class="card" style="padding:1.5rem;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+            <span class="section-label" style="margin-bottom:0;">今日热搜趋势</span>
+            <span id="trending-date" style="font-size:0.72rem;color:var(--text-muted);font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;"></span>
+        </div>
+        <div style="overflow-x:auto;">
+            <table class="trending-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>话题</th>
+                        <th>分类</th>
+                        <th>热度</th>
+                        <th>上榜理由</th>
+                    </tr>
+                </thead>
+                <tbody id="trending-tbody"></tbody>
+            </table>
+        </div>
+        <p style="text-align:center;color:var(--text-muted);font-size:0.7rem;margin-top:0.8rem;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;">
+            每日 8:00 更新 · 由 AI 基于小红书社区趋势生成
+        </p>
+    </div>
+</section>
+
 <!-- Form Card -->
 <div class="card animate-fade-in-up stagger-3" style="padding:2rem;">
     <form id="generate-form" style="display:flex;flex-direction:column;">
@@ -68,6 +95,10 @@
                 <button type="button" data-value="Vlog脚本" class="tag-pill tag-selectable">Vlog脚本</button>
                 <button type="button" data-value="避坑指南" class="tag-pill tag-selectable">避坑指南</button>
             </div>
+            <input type="text" class="input-dark custom-tag-input" data-field="style"
+                placeholder="或输入自定义类型，如：测评合集、教程连载..."
+                style="display:none;">
+            <button type="button" class="btn-ghost toggle-custom-btn" data-field="style">+ 自定义</button>
         </div>
 
         <!-- 4. 文案长度 -->
@@ -89,6 +120,10 @@
                 <button type="button" data-value="治愈/温暖" class="tag-pill tag-selectable">治愈/温暖</button>
                 <button type="button" data-value="犀利/敢说" class="tag-pill tag-selectable">犀利/敢说</button>
             </div>
+            <input type="text" class="input-dark custom-tag-input" data-field="tone"
+                placeholder="或输入自定义风格，如：毒舌吐槽、学术严谨..."
+                style="display:none;">
+            <button type="button" class="btn-ghost toggle-custom-btn" data-field="tone">+ 自定义</button>
         </div>
 
         <div id="error-msg" style="display:none;padding:0.9rem 1.1rem;border-radius:var(--radius-md);background:rgba(255,36,66,0.06);border:1px solid rgba(255,36,66,0.2);color:var(--accent);font-size:0.875rem;margin:1rem 0 0;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;"></div>
@@ -108,30 +143,16 @@
     </div>
 </div>
 
-<!-- Feature Cards -->
-<div style="display:grid;grid-template-columns:1fr;gap:0.65rem;margin-top:1.25rem;padding-bottom:2rem;">
-    <div class="card animate-fade-in-up stagger-4" style="padding:1.25rem 1.5rem;display:flex;align-items:center;gap:1rem;">
-        <span class="feature-num">01</span>
-        <div>
-            <h3 style="font-weight:600;font-size:0.95rem;margin:0;letter-spacing:0.03em;">AI 智能创作</h3>
-            <p style="color:var(--text-secondary);font-size:0.825rem;margin:0.15rem 0 0;">基于热门趋势自动生成爆款选题与文案</p>
-        </div>
-    </div>
-    <div class="card animate-fade-in-up stagger-4" style="padding:1.25rem 1.5rem;display:flex;align-items:center;gap:1rem;">
-        <span class="feature-num">02</span>
-        <div>
-            <h3 style="font-weight:600;font-size:0.95rem;margin:0;letter-spacing:0.03em;">爆款优化</h3>
-            <p style="color:var(--text-secondary);font-size:0.825rem;margin:0.15rem 0 0;">多轮智能优化，提升标题吸引力与互动率</p>
-        </div>
-    </div>
-    <div class="card animate-fade-in-up stagger-4" style="padding:1.25rem 1.5rem;display:flex;align-items:center;gap:1rem;">
-        <span class="feature-num">03</span>
-        <div>
-            <h3 style="font-weight:600;font-size:0.95rem;margin:0;letter-spacing:0.03em;">合规检测</h3>
-            <p style="color:var(--text-secondary);font-size:0.825rem;margin:0.15rem 0 0;">自动检测敏感内容，标注风险等级，安全发布</p>
-        </div>
-    </div>
-</div>
+<!-- Feature intro -->
+<p class="animate-fade-in-up stagger-4" style="text-align:center;color:var(--text-muted);font-size:0.75rem;letter-spacing:0.08em;padding:1.2rem 0 0.3rem;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;">
+    AI 智能创作 &nbsp;·&nbsp; 爆款优化 &nbsp;·&nbsp; 合规检测
+</p>
+<p class="animate-fade-in-up stagger-4" style="text-align:center;padding-bottom:2rem;">
+    <a href="/history" style="font-size:0.75rem;color:var(--text-muted);text-decoration:none;transition:color 0.2s;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;"
+       onmouseenter="this.style.color='var(--text-primary)'" onmouseleave="this.style.color='var(--text-muted)'">
+        查看历史记录 →
+    </a>
+</p>
 {% endblock %}
 
 {% block scripts %}
@@ -142,6 +163,13 @@
     var loading = document.getElementById('loading');
     var errorMsg = document.getElementById('error-msg');
     var topicInput = document.getElementById('topic');
+
+    // Pre-fill topic from URL query param (remix feature)
+    var urlParams = new URLSearchParams(window.location.search);
+    var topicParam = urlParams.get('topic');
+    if (topicParam) {
+        topicInput.value = topicParam;
+    }
 
     // 主题快捷标签 — 填充到输入框
     document.querySelectorAll('#quick-tags .tag-pill').forEach(function(tag) {
@@ -166,6 +194,18 @@
         });
     });
 
+    // 自定义输入切换
+    document.querySelectorAll('.toggle-custom-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var field = this.dataset.field;
+            var input = document.querySelector('.custom-tag-input[data-field="' + field + '"]');
+            var isVisible = input.style.display !== 'none';
+            input.style.display = isVisible ? 'none' : 'block';
+            this.textContent = isVisible ? '+ 自定义' : '- 收起';
+            if (!isVisible) input.focus();
+        });
+    });
+
     form.addEventListener('submit', async function(e) {
         e.preventDefault();
         var topic = topicInput.value.trim();
@@ -182,7 +222,12 @@
 
         function getSelected(field) {
             var sel = document.querySelector('.tag-group[data-field="' + field + '"] .tag-selected');
-            return sel ? sel.dataset.value : '';
+            if (sel) return sel.dataset.value;
+            var customInput = document.querySelector('.custom-tag-input[data-field="' + field + '"]');
+            if (customInput && customInput.style.display !== 'none') {
+                return customInput.value.trim();
+            }
+            return '';
         }
 
         var payload = {
@@ -226,6 +271,49 @@
 
     function hideError() {
         errorMsg.style.display = 'none';
+    }
+
+    // Fetch trending topics
+    (async function() {
+        try {
+            var resp = await fetch('/api/trending');
+            var data = await resp.json();
+            if (!data.topics || data.topics.length === 0) return;
+
+            var section = document.getElementById('trending-section');
+            section.style.display = 'block';
+            document.getElementById('trending-date').textContent = data.date;
+
+            var tbody = document.getElementById('trending-tbody');
+            data.topics.forEach(function(t) {
+                var tr = document.createElement('tr');
+                tr.innerHTML =
+                    '<td class="' + (t.rank <= 3 ? 'trending-rank-hot' : '') + '" style="font-feature-settings:\'tnum\';">' + t.rank + '</td>' +
+                    '<td><span class="trending-topic-name">' + escapeHtml(t.topic_name) + '</span></td>' +
+                    '<td style="color:var(--text-muted);white-space:nowrap;">' + escapeHtml(t.category) + '</td>' +
+                    '<td class="trending-rank-hot" style="white-space:nowrap;">' + escapeHtml(t.heat_desc) + '</td>' +
+                    '<td style="color:var(--text-secondary);max-width:14rem;">' + escapeHtml(t.trend_reason) + '</td>';
+                tbody.appendChild(tr);
+            });
+
+            // Click topic name to fill input
+            tbody.addEventListener('click', function(e) {
+                var nameEl = e.target.closest('.trending-topic-name');
+                if (nameEl && nameEl.textContent) {
+                    topicInput.value = nameEl.textContent.trim();
+                    topicInput.focus();
+                    topicInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            });
+        } catch (err) {
+            // Silently fail — trending section just won't show
+        }
+    })();
+
+    function escapeHtml(str) {
+        var div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
     }
 })();
 </script>
