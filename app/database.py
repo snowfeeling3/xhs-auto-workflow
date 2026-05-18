@@ -20,4 +20,9 @@ def get_db():
 
 
 def init_db():
+    # 确保所有模型已导入再建表
+    import app.models.post  # noqa
+    import app.models.trending  # noqa
+    import app.models.credit  # noqa
+    import app.models.payment  # noqa
     Base.metadata.create_all(bind=engine)

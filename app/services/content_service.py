@@ -1,8 +1,6 @@
 import re
-from datetime import date
 
 from sqlalchemy.orm import Session
-from sqlalchemy import func
 
 from langchain_openai import ChatOpenAI
 
@@ -12,6 +10,7 @@ from app.agents.content_agent import ContentAgent
 from app.agents.optimize_agent import OptimizeAgent
 from app.agents.risk_agent import RiskAgent
 from app.models.post import Post
+from app.models.credit import CreditAccount
 
 
 def _parse_content(text: str) -> dict:
@@ -74,12 +73,28 @@ def _format_content_html(text: str) -> str:
     return text
 
 
-def _check_daily_limit(db: Session) -> bool:
-    today = date.today()
-    count = db.query(func.count(Post.id)).filter(
-        func.date(Post.created_at) == today
-    ).scalar()
-    return count < config.FREE_DAILY_LIMIT
+def get_or_create_account(db: Session, session_key: str) -> CreditAccount:
+    account = db.query(CreditAccount).filter(CreditAccount.session_key == session_key).first()
+    if account is None:
+        account = CreditAccount(
+            session_key=session_key,
+            credits=config.NEW_USER_CREDITS,
+        )
+        db.add(account)
+        db.commit()
+        db.refresh(account)
+    return account
+
+
+def check_and_deduct_credit(db: Session, session_key: str) -> str | None:
+    """检查并扣除1积分。返回None表示成功，返回字符串表示错误信息。"""
+    account = get_or_create_account(db, session_key)
+    if account.credits <= 0:
+        return "积分不足，请先充值（1元 = 3次使用）"
+    account.credits -= 1
+    account.total_used += 1
+    db.commit()
+    return None
 
 
 class ContentService:
@@ -98,9 +113,12 @@ class ContentService:
         style: str = "",
         length: str = "",
         tone: str = "",
+        session_key: str = "",
     ) -> dict:
-        if not _check_daily_limit(db):
-            return {"error": f"今日免费次数已用完（每日 {config.FREE_DAILY_LIMIT} 次），请明天再来"}
+        if session_key:
+            error = check_and_deduct_credit(db, session_key)
+            if error:
+                return {"error": error, "code": "no_credits"}
 
         # 构建用户需求上下文字段
         extra_parts = []
@@ -166,6 +184,16 @@ class ContentService:
             }
 
         except Exception as e:
+            # 扣除积分失败时退还积分
+            if session_key:
+                account = db.query(CreditAccount).filter(
+                    CreditAccount.session_key == session_key
+                ).first()
+                if account:
+                    account.credits += 1
+                    account.total_used -= 1
+                    db.commit()
+
             msg = str(e)
             for sensitive in [config.LLM_API_KEY, "api_key", "Authorization"]:
                 if sensitive and sensitive in msg:

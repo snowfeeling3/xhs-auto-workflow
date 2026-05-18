@@ -611,6 +611,19 @@
     {% block head %}{% endblock %}
 </head>
 <body>
+    {% if credits is defined %}
+    <nav style="position:relative;z-index:10;padding:0.6rem 1.25rem;display:flex;align-items:center;justify-content:flex-end;gap:1rem;border-bottom:1px solid var(--border-subtle);font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;">
+        <div style="display:flex;align-items:center;gap:0.4rem;font-size:0.82rem;color:var(--text-secondary);">
+            <span style="color:var(--text-muted);">剩余积分</span>
+            <span style="color:{% if credits > 0 %}var(--green-text){% else %}var(--accent){% endif %};font-weight:700;font-size:0.9rem;font-feature-settings:'tnum';">{{ credits }}</span>
+            <span style="color:var(--text-muted);">次</span>
+        </div>
+        <a href="/payment" style="font-size:0.78rem;color:var(--accent);text-decoration:none;border:1px solid rgba(255,36,66,0.3);padding:0.3rem 0.8rem;border-radius:100px;transition:all 0.2s;"
+           onmouseenter="this.style.background='rgba(255,36,66,0.08)'" onmouseleave="this.style.background='transparent'">
+            + 充值
+        </a>
+    </nav>
+    {% endif %}
     <div class="container-narrow">
         {% block content %}{% endblock %}
     </div>

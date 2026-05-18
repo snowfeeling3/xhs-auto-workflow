@@ -21,7 +21,10 @@ DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./xhs.db")
 REDIS_URL = os.getenv("REDIS_URL", "")
 
 # 业务配置
-FREE_DAILY_LIMIT = int(os.getenv("FREE_DAILY_LIMIT", "3"))
+NEW_USER_CREDITS = int(os.getenv("NEW_USER_CREDITS", "1"))  # 新用户初始免费积分（设为0则不送）
+PAYMENT_QR_URL = os.getenv("PAYMENT_QR_URL", "")  # 收款二维码图片路径或URL
+PAYMENT_AUTO_VERIFY = os.getenv("PAYMENT_AUTO_VERIFY", "false").lower() == "true"
+ADMIN_KEY = os.getenv("ADMIN_KEY", "admin123")  # 管理员验证密钥
 
 # 路径
 APP_DIR = Path(__file__).parent

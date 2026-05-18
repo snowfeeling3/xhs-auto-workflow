@@ -128,6 +128,12 @@
 
         <div id="error-msg" style="display:none;padding:0.9rem 1.1rem;border-radius:var(--radius-md);background:rgba(255,36,66,0.06);border:1px solid rgba(255,36,66,0.2);color:var(--accent);font-size:0.875rem;margin:1rem 0 0;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;"></div>
 
+        <div id="no-credits-msg" style="display:none;padding:1rem 1.1rem;border-radius:var(--radius-md);background:rgba(255,36,66,0.04);border:1px solid rgba(255,36,66,0.15);margin:1rem 0 0;text-align:center;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;">
+            <p style="color:var(--accent);font-weight:600;font-size:0.95rem;margin:0 0 0.5rem;">积分不足</p>
+            <p style="color:var(--text-secondary);font-size:0.85rem;margin:0 0 0.8rem;">￥1.00 = 3次生成，扫码即可充值</p>
+            <a href="/payment" class="btn-accent" style="font-size:0.85rem;padding:0.55rem 1.5rem;">去充值</a>
+        </div>
+
         <button type="submit" id="submit-btn" class="btn-accent" style="width:100%;margin-top:1.5rem;">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 7.2h7.6l-6 4.8 2.4 7.2-6.4-4.8-6.4 4.8 2.4-7.2-6-4.8h7.6z"/></svg>
             生成文案
@@ -216,6 +222,7 @@
         }
 
         hideError();
+        document.getElementById('no-credits-msg').style.display = 'none';
         submitBtn.disabled = true;
         form.style.display = 'none';
         loading.style.display = 'block';
@@ -248,7 +255,11 @@
             var data = await resp.json();
 
             if (data.error) {
-                showError(data.error);
+                if (data.code === 'no_credits') {
+                    document.getElementById('no-credits-msg').style.display = 'block';
+                } else {
+                    showError(data.error);
+                }
                 form.style.display = 'flex';
                 loading.style.display = 'none';
                 submitBtn.disabled = false;
