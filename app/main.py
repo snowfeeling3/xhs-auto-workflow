@@ -45,6 +45,7 @@ class GenerateRequest(BaseModel):
 
 class PaymentSubmitRequest(BaseModel):
     transaction_id: str
+    verification_code: str = ""
 
 
 def resolve_session_key(request: Request, session_key: str = Cookie(default="")) -> str:
@@ -225,11 +226,25 @@ def payment_page(
         .all()
     )
 
+    # 生成或复用验证码（同一 session 24 小时内复用）
+    import random
+    recent = (
+        db.query(PaymentRecord)
+        .filter(PaymentRecord.session_key == new_key)
+        .order_by(PaymentRecord.created_at.desc())
+        .first()
+    )
+    if recent and recent.status == PaymentStatus.pending.value:
+        verify_code = recent.verification_code
+    else:
+        verify_code = str(random.randint(100000, 999999))
+
     template = jinja_env.get_template("payment.html")
     resp = HTMLResponse(template.render(
         request=request,
         credits=account.credits,
         qr_url=config.PAYMENT_QR_URL,
+        verify_code=verify_code,
         payments=payments,
     ))
     if not session_key:
@@ -248,8 +263,11 @@ def submit_payment(
         return {"error": "会话未识别，请刷新页面后重试"}
     if not req.transaction_id.strip():
         return {"error": "请输入付款交易单号"}
+    if not req.verification_code.strip():
+        return {"error": "请输入付款验证码"}
 
     tid = req.transaction_id.strip()
+    vcode = req.verification_code.strip()
 
     # 检查是否已提交过相同交易单号
     existing = db.query(PaymentRecord).filter(
@@ -261,6 +279,7 @@ def submit_payment(
     record = PaymentRecord(
         session_key=session_key,
         transaction_id=tid,
+        verification_code=vcode,
         amount_yuan=1,
         credits=3,
     )
@@ -340,12 +359,14 @@ def admin_payments(
     rows = ""
     for p in payments:
         tx_id = html.escape(p.transaction_id)
+        vcode = html.escape(p.verification_code or "")
         remark = html.escape(p.remark or "")
         rows += f"""
         <tr>
             <td style="padding:8px;border:1px solid #333;">{p.id}</td>
             <td style="padding:8px;border:1px solid #333;">{html.escape(p.session_key[:12])}...</td>
             <td style="padding:8px;border:1px solid #333;">{tx_id}</td>
+            <td style="padding:8px;border:1px solid #333;font-weight:700;color:#FCD34D;">{vcode}</td>
             <td style="padding:8px;border:1px solid #333;">¥{p.amount_yuan}</td>
             <td style="padding:8px;border:1px solid #333;">{p.credits}次</td>
             <td style="padding:8px;border:1px solid #333;color:{'#6EE7B7' if p.status == 'verified' else '#FCD34D' if p.status == 'pending' else '#FF2442'}">{p.status}</td>
@@ -364,6 +385,7 @@ def admin_payments(
     <th style="padding:8px;border:1px solid #333;">ID</th>
     <th style="padding:8px;border:1px solid #333;">Session</th>
     <th style="padding:8px;border:1px solid #333;">交易单号</th>
+    <th style="padding:8px;border:1px solid #333;">验证码</th>
     <th style="padding:8px;border:1px solid #333;">金额</th>
     <th style="padding:8px;border:1px solid #333;">积分</th>
     <th style="padding:8px;border:1px solid #333;">状态</th>

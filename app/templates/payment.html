@@ -16,8 +16,22 @@
     </p>
 </section>
 
-<!-- 付款二维码 -->
+<!-- 付款验证码 -->
 <div class="card animate-fade-in-up stagger-2" style="padding:2rem;margin-top:1.5rem;text-align:center;">
+    <span class="section-label" style="margin-bottom:1rem;">付款验证码</span>
+    <p style="color:var(--text-secondary);font-size:0.85rem;margin:0 0 1rem;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;">
+        付款时请将验证码写在<strong style="color:var(--text-primary);">备注/附言</strong>中
+    </p>
+    <div style="background:var(--bg-surface);border:2px dashed var(--accent);border-radius:var(--radius-md);padding:1rem 2rem;display:inline-block;margin-bottom:0.5rem;">
+        <span style="font-size:2.2rem;font-weight:800;letter-spacing:0.15em;color:var(--accent);font-feature-settings:'tnum';user-select:all;">{{ verify_code }}</span>
+    </div>
+    <p style="color:var(--text-muted);font-size:0.72rem;margin:0;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;">
+        管理员核对备注中的验证码来确认付款真实性
+    </p>
+</div>
+
+<!-- 付款二维码 -->
+<div class="card animate-fade-in-up stagger-3" style="padding:2rem;margin-top:1rem;text-align:center;">
     <span class="section-label" style="margin-bottom:1.5rem;">扫码付款</span>
 
     <div style="background:#fff;border-radius:var(--radius-md);padding:1.5rem;display:inline-block;margin-bottom:1rem;">
@@ -29,28 +43,32 @@
         ￥1.00 <span style="color:var(--text-secondary);font-weight:400;font-size:0.9rem;">= 3 次生成</span>
     </div>
     <p style="color:var(--text-muted);font-size:0.82rem;margin:0 0 1.5rem;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;">
-        支持微信 / 支付宝扫码付款
+        微信 / 支付宝扫码，记得在备注中填写验证码
     </p>
 
     <hr class="hr-fade" style="margin:1.5rem 0;">
 
     <!-- 提交付款信息 -->
     <div style="max-width:24rem;margin:0 auto;text-align:left;">
-        <label class="section-label" style="margin-bottom:0.6rem;">验证付款</label>
+        <label class="section-label" style="margin-bottom:0.6rem;">确认付款信息</label>
         <p style="color:var(--text-muted);font-size:0.8rem;margin:0 0 0.8rem;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;">
-            付款完成后，请输入微信/支付宝的交易单号（可在账单详情中查看）。
+            付款完成后，填写下方信息提交验证。管理员核对后积分到账。
         </p>
 
         <div id="submit-error" style="display:none;padding:0.7rem 0.9rem;border-radius:var(--radius-sm);background:rgba(255,36,66,0.06);border:1px solid rgba(255,36,66,0.2);color:var(--accent);font-size:0.85rem;margin-bottom:0.8rem;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;"></div>
         <div id="submit-success" style="display:none;padding:0.7rem 0.9rem;border-radius:var(--radius-sm);background:var(--green-subtle);border:1px solid rgba(52,211,153,0.2);color:var(--green-text);font-size:0.85rem;margin-bottom:0.8rem;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;"></div>
 
-        <input type="text" id="transaction-id" placeholder="输入交易单号" class="input-dark" style="margin-bottom:0.8rem;">
+        <label style="color:var(--text-secondary);font-size:0.78rem;display:block;margin-bottom:0.3rem;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;">付款验证码</label>
+        <input type="text" id="verification-code" placeholder="输入你写在备注中的验证码" class="input-dark" style="margin-bottom:0.8rem;">
+
+        <label style="color:var(--text-secondary);font-size:0.78rem;display:block;margin-bottom:0.3rem;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;">交易单号（微信/支付宝账单详情中查看）</label>
+        <input type="text" id="transaction-id" placeholder="输入交易单号" class="input-dark" style="margin-bottom:1rem;">
         <button id="submit-btn" class="btn-accent" style="width:100%;">提交验证</button>
     </div>
 </div>
 
 <!-- 付款记录 -->
-<div class="card animate-fade-in-up stagger-3" style="padding:1.5rem;margin:1.5rem 0 2rem;">
+<div class="card animate-fade-in-up stagger-4" style="padding:1.5rem;margin:1.5rem 0 2rem;">
     <span class="section-label" style="margin-bottom:1rem;">充值记录</span>
     {% if payments %}
     <div style="overflow-x:auto;">
@@ -58,6 +76,7 @@
             <thead>
                 <tr>
                     <th>交易单号</th>
+                    <th>验证码</th>
                     <th>金额</th>
                     <th>积分</th>
                     <th>状态</th>
@@ -68,6 +87,7 @@
                 {% for p in payments %}
                 <tr>
                     <td style="font-family:monospace;font-size:0.8rem;">{{ p.transaction_id }}</td>
+                    <td style="font-family:monospace;font-weight:600;color:var(--accent);">{{ p.verification_code }}</td>
                     <td>¥{{ p.amount_yuan }}</td>
                     <td>{{ p.credits }}次</td>
                     <td>
@@ -96,11 +116,17 @@
 (function() {
     var submitBtn = document.getElementById('submit-btn');
     var input = document.getElementById('transaction-id');
+    var vcodeInput = document.getElementById('verification-code');
     var errorDiv = document.getElementById('submit-error');
     var successDiv = document.getElementById('submit-success');
 
     submitBtn.addEventListener('click', async function() {
         var tid = input.value.trim();
+        var vcode = vcodeInput.value.trim();
+        if (!vcode) {
+            showError('请输入付款验证码');
+            return;
+        }
         if (!tid) {
             showError('请输入交易单号');
             return;
@@ -114,7 +140,7 @@
             var resp = await fetch('/api/payment/submit', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ transaction_id: tid })
+                body: JSON.stringify({ transaction_id: tid, verification_code: vcode })
             });
             var data = await resp.json();
 

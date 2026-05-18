@@ -16,6 +16,7 @@ class PaymentRecord(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     session_key = Column(String(64), nullable=False, index=True)
     transaction_id = Column(String(100), nullable=False)
+    verification_code = Column(String(6), nullable=False)
     amount_yuan = Column(Integer, default=1, nullable=False)
     credits = Column(Integer, default=3, nullable=False)
     status = Column(String(20), default=PaymentStatus.pending.value, nullable=False)
@@ -27,6 +28,7 @@ class PaymentRecord(Base):
             "id": self.id,
             "session_key": self.session_key,
             "transaction_id": self.transaction_id,
+            "verification_code": self.verification_code,
             "amount_yuan": self.amount_yuan,
             "credits": self.credits,
             "status": self.status,
