@@ -57,8 +57,22 @@ def _parse_image_suggestions(text: str) -> list:
     return [m.group(1).strip() for m in re.finditer(pattern, text)]
 
 
+def _sanitize_html(text: str) -> str:
+    """移除危险的 HTML 标签和事件处理器，防止 XSS。"""
+    # 移除 script / iframe / object / embed 标签
+    text = re.sub(r'<script[^>]*>.*?</script>', '', text, flags=re.IGNORECASE | re.DOTALL)
+    text = re.sub(r'<iframe[^>]*>.*?</iframe>', '', text, flags=re.IGNORECASE | re.DOTALL)
+    text = re.sub(r'<object[^>]*>.*?</object>', '', text, flags=re.IGNORECASE | re.DOTALL)
+    text = re.sub(r'<embed[^>]*>', '', text, flags=re.IGNORECASE)
+    # 移除 on* 事件处理器
+    text = re.sub(r'\s+on\w+\s*=\s*["\'][^"\']*["\']', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'\s+on\w+\s*=\s*[^\s>]+', '', text, flags=re.IGNORECASE)
+    return text
+
+
 def _format_content_html(text: str) -> str:
     """Convert basic markdown and image markers to HTML."""
+    text = _sanitize_html(text)
     # Bold
     text = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', text)
     # Image placeholders

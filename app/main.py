@@ -1,13 +1,16 @@
 import os
+import hashlib
+import hmac
+import html
 import warnings
 warnings.filterwarnings("ignore", message=".*allowed_objects.*")
 
 from datetime import date
 from uuid import uuid4
 
-from fastapi import FastAPI, Request, Depends, Cookie, Query
+from fastapi import FastAPI, Request, Depends, Cookie, Query, Form
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from jinja2 import Environment, FileSystemLoader
@@ -67,7 +70,7 @@ def index(request: Request, session_key: str = Cookie(default=""), db: Session =
         session_key=new_key,
     ))
     if not session_key:
-        resp.set_cookie(key="session_key", value=new_key, max_age=365 * 24 * 3600, httponly=True)
+        resp.set_cookie(key="session_key", value=new_key, max_age=365 * 24 * 3600, httponly=True, samesite="lax")
     return resp
 
 
@@ -92,7 +95,7 @@ def generate(
     result["credits"] = account.credits
     resp = JSONResponse(result)
     if not session_key:
-        resp.set_cookie(key="session_key", value=new_key, max_age=365 * 24 * 3600, httponly=True)
+        resp.set_cookie(key="session_key", value=new_key, max_age=365 * 24 * 3600, httponly=True, samesite="lax")
     return resp
 
 
@@ -145,7 +148,7 @@ def result(
         credits=account.credits,
     ))
     if not session_key:
-        resp.set_cookie(key="session_key", value=new_key, max_age=365 * 24 * 3600, httponly=True)
+        resp.set_cookie(key="session_key", value=new_key, max_age=365 * 24 * 3600, httponly=True, samesite="lax")
     return resp
 
 
@@ -182,7 +185,7 @@ def history(
         credits=account.credits,
     ))
     if not session_key:
-        resp.set_cookie(key="session_key", value=new_key, max_age=365 * 24 * 3600, httponly=True)
+        resp.set_cookie(key="session_key", value=new_key, max_age=365 * 24 * 3600, httponly=True, samesite="lax")
     return resp
 
 
@@ -196,7 +199,7 @@ def api_credits(
     account = get_or_create_account(db, new_key)
     resp = JSONResponse({"credits": account.credits, "total_used": account.total_used})
     if not session_key:
-        resp.set_cookie(key="session_key", value=new_key, max_age=365 * 24 * 3600, httponly=True)
+        resp.set_cookie(key="session_key", value=new_key, max_age=365 * 24 * 3600, httponly=True, samesite="lax")
     return resp
 
 
@@ -230,7 +233,7 @@ def payment_page(
         payments=payments,
     ))
     if not session_key:
-        resp.set_cookie(key="session_key", value=new_key, max_age=365 * 24 * 3600, httponly=True)
+        resp.set_cookie(key="session_key", value=new_key, max_age=365 * 24 * 3600, httponly=True, samesite="lax")
     return resp
 
 
@@ -284,14 +287,48 @@ def submit_payment(
     }
 
 
+# ── 管理后台辅助 ──
+def _admin_cookie_value() -> str:
+    return hmac.new(config.ADMIN_KEY.encode(), b"admin", hashlib.sha256).hexdigest()
+
+def _check_admin(key: str, admin_token: str) -> bool:
+    if admin_token == _admin_cookie_value():
+        return True
+    if key == config.ADMIN_KEY:
+        return True
+    return False
+
+# ── 管理后台：登录 ──
+@app.get("/admin/login", response_class=HTMLResponse)
+def admin_login_page(request: Request):
+    body = """<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><title>管理登录</title></head>
+<body style="background:#09090B;color:#EDEDF0;font-family:monospace;display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0;">
+<form method="post" action="/admin/login" style="background:#1A1A1F;padding:2rem;border-radius:12px;border:1px solid #252530;">
+<h2 style="margin:0 0 1.5rem;">管理后台登录</h2>
+<input type="password" name="key" placeholder="管理密钥" style="width:100%;padding:0.7rem;background:#131316;border:1px solid #252530;border-radius:8px;color:#EDEDF0;font-size:0.95rem;margin-bottom:1rem;">
+<button type="submit" style="width:100%;padding:0.7rem;background:#FF2442;color:#fff;border:none;border-radius:8px;font-size:0.95rem;cursor:pointer;">登录</button>
+</form></body></html>"""
+    return HTMLResponse(body)
+
+@app.post("/admin/login")
+def admin_login(key: str = Form(...)):
+    if key != config.ADMIN_KEY:
+        return HTMLResponse("<h2>密钥错误</h2>", status_code=403)
+    resp = RedirectResponse("/admin/payments", status_code=303)
+    resp.set_cookie(key="admin_token", value=_admin_cookie_value(), max_age=8 * 3600, httponly=True, samesite="lax")
+    return resp
+
 # ── 管理后台：付款记录列表 ──
 @app.get("/admin/payments")
 def admin_payments(
     request: Request,
     key: str = Query(default=""),
+    admin_token: str = Cookie(default=""),
     db: Session = Depends(get_db),
 ):
-    if key != config.ADMIN_KEY:
+    if not _check_admin(key, admin_token):
         return HTMLResponse("<h2>无权访问</h2>", status_code=403)
 
     payments = (
@@ -302,20 +339,22 @@ def admin_payments(
     )
     rows = ""
     for p in payments:
+        tx_id = html.escape(p.transaction_id)
+        remark = html.escape(p.remark or "")
         rows += f"""
         <tr>
             <td style="padding:8px;border:1px solid #333;">{p.id}</td>
-            <td style="padding:8px;border:1px solid #333;">{p.session_key[:12]}...</td>
-            <td style="padding:8px;border:1px solid #333;">{p.transaction_id}</td>
+            <td style="padding:8px;border:1px solid #333;">{html.escape(p.session_key[:12])}...</td>
+            <td style="padding:8px;border:1px solid #333;">{tx_id}</td>
             <td style="padding:8px;border:1px solid #333;">¥{p.amount_yuan}</td>
             <td style="padding:8px;border:1px solid #333;">{p.credits}次</td>
             <td style="padding:8px;border:1px solid #333;color:{'#6EE7B7' if p.status == 'verified' else '#FCD34D' if p.status == 'pending' else '#FF2442'}">{p.status}</td>
             <td style="padding:8px;border:1px solid #333;">{p.created_at.strftime('%Y-%m-%d %H:%M') if p.created_at else ''}</td>
             <td style="padding:8px;border:1px solid #333;">
-                {"<a href='/admin/verify/{id}?key={k}&action=approve' style='color:#6EE7B7;margin-right:8px;'>通过</a><a href='/admin/verify/{id}?key={k}&action=reject' style='color:#FF2442;'>拒绝</a>".format(id=p.id, k=config.ADMIN_KEY) if p.status == 'pending' else p.remark}
+                {"<a href='/admin/verify/{id}?action=approve' style='color:#6EE7B7;margin-right:8px;'>通过</a><a href='/admin/verify/{id}?action=reject' style='color:#FF2442;'>拒绝</a>".format(id=p.id) if p.status == 'pending' else remark}
             </td>
         </tr>"""
-    html = f"""<!DOCTYPE html>
+    html_body = f"""<!DOCTYPE html>
 <html lang="zh-CN">
 <head><meta charset="UTF-8"><title>付款管理</title></head>
 <body style="background:#09090B;color:#EDEDF0;font-family:monospace;padding:2rem;">
@@ -333,9 +372,12 @@ def admin_payments(
 </tr></thead>
 <tbody>{rows}</tbody>
 </table>
-<p style="margin-top:1rem;color:#5C5C68;"><a href="/payment" style="color:var(--accent);">返回付款页</a></p>
+<p style="margin-top:1rem;color:#5C5C68;"><a href="/payment" style="color:#FF2442;">返回付款页</a></p>
 </body></html>"""
-    return HTMLResponse(html)
+    resp = HTMLResponse(html_body)
+    if key == config.ADMIN_KEY and admin_token != _admin_cookie_value():
+        resp.set_cookie(key="admin_token", value=_admin_cookie_value(), max_age=8 * 3600, httponly=True, samesite="lax")
+    return resp
 
 
 # ── 管理后台：审核付款 ──
@@ -344,9 +386,10 @@ def admin_verify(
     payment_id: int,
     key: str = Query(default=""),
     action: str = Query(default="approve"),
+    admin_token: str = Cookie(default=""),
     db: Session = Depends(get_db),
 ):
-    if key != config.ADMIN_KEY:
+    if not _check_admin(key, admin_token):
         return HTMLResponse("<h2>无权访问</h2>", status_code=403)
 
     record = db.query(PaymentRecord).filter(PaymentRecord.id == payment_id).first()
@@ -371,13 +414,13 @@ def admin_verify(
         record.status = PaymentStatus.verified.value
         record.remark = "管理员验证通过"
         db.commit()
-        return HTMLResponse(f"<h2>已通过，为用户 {record.session_key[:12]}... 充值 {record.credits} 次</h2><p><a href='/admin/payments?key={key}'>返回管理</a></p>")
+        return HTMLResponse(f"<h2>已通过，为用户 {html.escape(record.session_key[:12])}... 充值 {record.credits} 次</h2><p><a href='/admin/payments'>返回管理</a></p>")
 
     if action == "reject":
         record.status = PaymentStatus.rejected.value
         record.remark = "管理员拒绝"
         db.commit()
-        return HTMLResponse(f"<h2>已拒绝</h2><p><a href='/admin/payments?key={key}'>返回管理</a></p>")
+        return HTMLResponse(f"<h2>已拒绝</h2><p><a href='/admin/payments'>返回管理</a></p>")
 
     return HTMLResponse("<h2>无效操作</h2>")
 
