@@ -1,7 +1,6 @@
 import os
 import hashlib
 import hmac
-import html
 import warnings
 warnings.filterwarnings("ignore", message=".*allowed_objects.*")
 
@@ -318,25 +317,25 @@ def _check_admin(key: str, admin_token: str) -> bool:
     return False
 
 # ── 管理后台：登录 ──
-@app.get("/admin/login", response_class=HTMLResponse)
+@app.get("/admin/login")
 def admin_login_page(request: Request):
-    body = """<!DOCTYPE html>
-<html lang="zh-CN">
-<head><meta charset="UTF-8"><title>管理登录</title></head>
-<body style="background:#09090B;color:#EDEDF0;font-family:monospace;display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0;">
-<form method="post" action="/admin/login" style="background:#1A1A1F;padding:2rem;border-radius:12px;border:1px solid #252530;">
-<h2 style="margin:0 0 1.5rem;">管理后台登录</h2>
-<input type="password" name="key" placeholder="管理密钥" style="width:100%;padding:0.7rem;background:#131316;border:1px solid #252530;border-radius:8px;color:#EDEDF0;font-size:0.95rem;margin-bottom:1rem;">
-<button type="submit" style="width:100%;padding:0.7rem;background:#FF2442;color:#fff;border:none;border-radius:8px;font-size:0.95rem;cursor:pointer;">登录</button>
-</form></body></html>"""
-    return HTMLResponse(body)
+    template = jinja_env.get_template("admin_login.html")
+    return HTMLResponse(template.render(request=request))
 
 @app.post("/admin/login")
 def admin_login(key: str = Form(...)):
     if key != config.ADMIN_KEY:
-        return HTMLResponse("<h2>密钥错误</h2>", status_code=403)
+        template = jinja_env.get_template("admin_login.html")
+        return HTMLResponse(template.render(request=None, error="密钥错误"), status_code=403)
     resp = RedirectResponse("/admin/payments", status_code=303)
     resp.set_cookie(key="admin_token", value=_admin_cookie_value(), max_age=8 * 3600, httponly=True, samesite="lax")
+    return resp
+
+# ── 管理后台：退出 ──
+@app.get("/admin/logout")
+def admin_logout():
+    resp = RedirectResponse("/admin/login", status_code=303)
+    resp.delete_cookie("admin_token")
     return resp
 
 # ── 管理后台：付款记录列表 ──
@@ -344,82 +343,58 @@ def admin_login(key: str = Form(...)):
 def admin_payments(
     request: Request,
     key: str = Query(default=""),
+    status: str = Query(default=""),
     admin_token: str = Cookie(default=""),
     db: Session = Depends(get_db),
 ):
     if not _check_admin(key, admin_token):
-        return HTMLResponse("<h2>无权访问</h2>", status_code=403)
+        return RedirectResponse("/admin/login", status_code=303)
 
-    payments = (
-        db.query(PaymentRecord)
-        .order_by(PaymentRecord.created_at.desc())
-        .limit(100)
-        .all()
-    )
-    rows = ""
-    for p in payments:
-        tx_id = html.escape(p.transaction_id)
-        vcode = html.escape(p.verification_code or "")
-        remark = html.escape(p.remark or "")
-        rows += f"""
-        <tr>
-            <td style="padding:8px;border:1px solid #333;">{p.id}</td>
-            <td style="padding:8px;border:1px solid #333;">{html.escape(p.session_key[:12])}...</td>
-            <td style="padding:8px;border:1px solid #333;">{tx_id}</td>
-            <td style="padding:8px;border:1px solid #333;font-weight:700;color:#FCD34D;">{vcode}</td>
-            <td style="padding:8px;border:1px solid #333;">¥{p.amount_yuan}</td>
-            <td style="padding:8px;border:1px solid #333;">{p.credits}次</td>
-            <td style="padding:8px;border:1px solid #333;color:{'#6EE7B7' if p.status == 'verified' else '#FCD34D' if p.status == 'pending' else '#FF2442'}">{p.status}</td>
-            <td style="padding:8px;border:1px solid #333;">{p.created_at.strftime('%Y-%m-%d %H:%M') if p.created_at else ''}</td>
-            <td style="padding:8px;border:1px solid #333;">
-                {"<a href='/admin/verify/{id}?action=approve' style='color:#6EE7B7;margin-right:8px;'>通过</a><a href='/admin/verify/{id}?action=reject' style='color:#FF2442;'>拒绝</a>".format(id=p.id) if p.status == 'pending' else remark}
-            </td>
-        </tr>"""
-    html_body = f"""<!DOCTYPE html>
-<html lang="zh-CN">
-<head><meta charset="UTF-8"><title>付款管理</title></head>
-<body style="background:#09090B;color:#EDEDF0;font-family:monospace;padding:2rem;">
-<h2>付款记录管理</h2>
-<table style="border-collapse:collapse;width:100%;">
-<thead><tr>
-    <th style="padding:8px;border:1px solid #333;">ID</th>
-    <th style="padding:8px;border:1px solid #333;">Session</th>
-    <th style="padding:8px;border:1px solid #333;">交易单号</th>
-    <th style="padding:8px;border:1px solid #333;">验证码</th>
-    <th style="padding:8px;border:1px solid #333;">金额</th>
-    <th style="padding:8px;border:1px solid #333;">积分</th>
-    <th style="padding:8px;border:1px solid #333;">状态</th>
-    <th style="padding:8px;border:1px solid #333;">时间</th>
-    <th style="padding:8px;border:1px solid #333;">操作</th>
-</tr></thead>
-<tbody>{rows}</tbody>
-</table>
-<p style="margin-top:1rem;color:#5C5C68;"><a href="/payment" style="color:#FF2442;">返回付款页</a></p>
-</body></html>"""
-    resp = HTMLResponse(html_body)
+    query = db.query(PaymentRecord)
+    if status and status in ("pending", "verified", "rejected"):
+        query = query.filter(PaymentRecord.status == status)
+    payments = query.order_by(PaymentRecord.created_at.desc()).limit(200).all()
+
+    # 统计
+    counts = {
+        "total": db.query(PaymentRecord).count(),
+        "pending": db.query(PaymentRecord).filter(PaymentRecord.status == "pending").count(),
+        "verified": db.query(PaymentRecord).filter(PaymentRecord.status == "verified").count(),
+        "rejected": db.query(PaymentRecord).filter(PaymentRecord.status == "rejected").count(),
+    }
+    total_credits = db.query(PaymentRecord).filter(PaymentRecord.status == "verified").count() * 3
+
+    template = jinja_env.get_template("admin_payments.html")
+    resp = HTMLResponse(template.render(
+        request=request,
+        payments=payments,
+        counts=counts,
+        total_credits=total_credits,
+        status_filter=status,
+    ))
     if key == config.ADMIN_KEY and admin_token != _admin_cookie_value():
         resp.set_cookie(key="admin_token", value=_admin_cookie_value(), max_age=8 * 3600, httponly=True, samesite="lax")
     return resp
 
 
-# ── 管理后台：审核付款 ──
-@app.get("/admin/verify/{payment_id}")
+# ── 管理后台：审核付款（POST，防 CSRF） ──
+@app.post("/admin/verify/{payment_id}/{action}")
 def admin_verify(
     payment_id: int,
-    key: str = Query(default=""),
-    action: str = Query(default="approve"),
+    action: str,
+    key: str = Form(default=""),
     admin_token: str = Cookie(default=""),
     db: Session = Depends(get_db),
 ):
     if not _check_admin(key, admin_token):
-        return HTMLResponse("<h2>无权访问</h2>", status_code=403)
+        return RedirectResponse("/admin/login", status_code=303)
+
+    if action not in ("approve", "reject"):
+        return RedirectResponse("/admin/payments", status_code=303)
 
     record = db.query(PaymentRecord).filter(PaymentRecord.id == payment_id).first()
-    if not record:
-        return HTMLResponse("<h2>记录不存在</h2>", status_code=404)
-
-    if record.status != PaymentStatus.pending.value:
-        return HTMLResponse(f"<h2>该记录已处理，当前状态：{record.status}</h2>")
+    if not record or record.status != PaymentStatus.pending.value:
+        return RedirectResponse("/admin/payments", status_code=303)
 
     if action == "approve":
         account = db.query(CreditAccount).filter(
@@ -436,15 +411,13 @@ def admin_verify(
         record.status = PaymentStatus.verified.value
         record.remark = "管理员验证通过"
         db.commit()
-        return HTMLResponse(f"<h2>已通过，为用户 {html.escape(record.session_key[:12])}... 充值 {record.credits} 次</h2><p><a href='/admin/payments'>返回管理</a></p>")
+        return RedirectResponse("/admin/payments", status_code=303)
 
     if action == "reject":
         record.status = PaymentStatus.rejected.value
         record.remark = "管理员拒绝"
         db.commit()
-        return HTMLResponse(f"<h2>已拒绝</h2><p><a href='/admin/payments'>返回管理</a></p>")
-
-    return HTMLResponse("<h2>无效操作</h2>")
+        return RedirectResponse("/admin/payments", status_code=303)
 
 
 if __name__ == "__main__":

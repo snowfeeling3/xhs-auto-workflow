@@ -1,0 +1,119 @@
+{% extends "layout.html" %}
+{% block title %}付款管理 — 管理后台{% endblock %}
+
+{% block content %}
+<div style="padding:2.5rem 0 1rem;">
+    <a href="/" class="back-link">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        返回首页
+    </a>
+</div>
+
+<section class="animate-fade-in-up stagger-1" style="margin-bottom:1.5rem;">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+        <div>
+            <span style="font-size:0.68rem;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;">Admin Panel</span>
+            <h1 style="font-size:1.8rem;font-weight:700;margin:0.25rem 0 0;">付款记录管理</h1>
+        </div>
+        <a href="/admin/logout" class="btn-ghost" style="color:var(--text-muted);">退出登录</a>
+    </div>
+</section>
+
+<!-- 统计卡片 -->
+<div class="animate-fade-in-up stagger-2" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:0.75rem;margin-bottom:1.5rem;">
+    <div class="card" style="padding:1.2rem;text-align:center;">
+        <div style="font-size:1.6rem;font-weight:700;font-feature-settings:'tnum';color:var(--text-primary);">{{ counts.total }}</div>
+        <div style="font-size:0.72rem;color:var(--text-muted);letter-spacing:0.05em;margin-top:0.25rem;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;">全部记录</div>
+    </div>
+    <div class="card" style="padding:1.2rem;text-align:center;">
+        <div style="font-size:1.6rem;font-weight:700;font-feature-settings:'tnum';color:var(--amber-text);">{{ counts.pending }}</div>
+        <div style="font-size:0.72rem;color:var(--text-muted);letter-spacing:0.05em;margin-top:0.25rem;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;">待处理</div>
+    </div>
+    <div class="card" style="padding:1.2rem;text-align:center;">
+        <div style="font-size:1.6rem;font-weight:700;font-feature-settings:'tnum';color:var(--green-text);">{{ counts.verified }}</div>
+        <div style="font-size:0.72rem;color:var(--text-muted);letter-spacing:0.05em;margin-top:0.25rem;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;">已验证</div>
+    </div>
+    <div class="card" style="padding:1.2rem;text-align:center;">
+        <div style="font-size:1.6rem;font-weight:700;font-feature-settings:'tnum';color:var(--accent);">{{ counts.rejected }}</div>
+        <div style="font-size:0.72rem;color:var(--text-muted);letter-spacing:0.05em;margin-top:0.25rem;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;">已拒绝</div>
+    </div>
+    <div class="card" style="padding:1.2rem;text-align:center;">
+        <div style="font-size:1.6rem;font-weight:700;font-feature-settings:'tnum';">{{ total_credits }}</div>
+        <div style="font-size:0.72rem;color:var(--text-muted);letter-spacing:0.05em;margin-top:0.25rem;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;">累计积分</div>
+    </div>
+</div>
+
+<!-- 筛选标签 -->
+<div class="animate-fade-in-up stagger-2" style="display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:1rem;">
+    <a href="/admin/payments" class="tag-pill {% if not status_filter %}tag-selected{% endif %}">全部</a>
+    <a href="?status=pending" class="tag-pill {% if status_filter == 'pending' %}tag-selected{% endif %}">待处理</a>
+    <a href="?status=verified" class="tag-pill {% if status_filter == 'verified' %}tag-selected{% endif %}">已验证</a>
+    <a href="?status=rejected" class="tag-pill {% if status_filter == 'rejected' %}tag-selected{% endif %}">已拒绝</a>
+</div>
+
+<!-- 付款记录表格 -->
+<div class="card animate-fade-in-up stagger-3" style="overflow:hidden;">
+    {% if payments %}
+    <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;font-size:0.85rem;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;">
+            <thead>
+                <tr style="border-bottom:1px solid var(--border-subtle);">
+                    <th style="text-align:left;padding:0.75rem 1.2rem;color:var(--text-muted);font-weight:600;font-size:0.68rem;letter-spacing:0.08em;white-space:nowrap;">ID</th>
+                    <th style="text-align:left;padding:0.75rem 0.6rem;color:var(--text-muted);font-weight:600;font-size:0.68rem;letter-spacing:0.08em;white-space:nowrap;">用户</th>
+                    <th style="text-align:left;padding:0.75rem 0.6rem;color:var(--text-muted);font-weight:600;font-size:0.68rem;letter-spacing:0.08em;white-space:nowrap;">交易单号</th>
+                    <th style="text-align:left;padding:0.75rem 0.6rem;color:var(--text-muted);font-weight:600;font-size:0.68rem;letter-spacing:0.08em;white-space:nowrap;">验证码</th>
+                    <th style="text-align:left;padding:0.75rem 0.6rem;color:var(--text-muted);font-weight:600;font-size:0.68rem;letter-spacing:0.08em;white-space:nowrap;">金额</th>
+                    <th style="text-align:left;padding:0.75rem 0.6rem;color:var(--text-muted);font-weight:600;font-size:0.68rem;letter-spacing:0.08em;white-space:nowrap;">积分</th>
+                    <th style="text-align:left;padding:0.75rem 0.6rem;color:var(--text-muted);font-weight:600;font-size:0.68rem;letter-spacing:0.08em;white-space:nowrap;">状态</th>
+                    <th style="text-align:left;padding:0.75rem 0.6rem;color:var(--text-muted);font-weight:600;font-size:0.68rem;letter-spacing:0.08em;white-space:nowrap;">时间</th>
+                    <th style="text-align:center;padding:0.75rem 1.2rem;color:var(--text-muted);font-weight:600;font-size:0.68rem;letter-spacing:0.08em;white-space:nowrap;">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in payments %}
+                <tr style="border-bottom:1px solid var(--border-subtle);transition:background 0.15s;{% if p.status == 'pending' %}background:rgba(251,191,36,0.03);{% endif %}" onmouseenter="this.style.background='rgba(255,255,255,0.02)'" onmouseleave="this.style.background='{% if p.status == "pending" %}rgba(251,191,36,0.03){% else %}transparent{% endif %}'">
+                    <td style="padding:0.75rem 1.2rem;font-feature-settings:'tnum';color:var(--text-muted);">{{ p.id }}</td>
+                    <td style="padding:0.75rem 0.6rem;font-family:monospace;font-size:0.78rem;color:var(--text-muted);">{{ p.session_key[:12] }}…</td>
+                    <td style="padding:0.75rem 0.6rem;font-family:monospace;font-size:0.78rem;">{{ p.transaction_id }}</td>
+                    <td style="padding:0.75rem 0.6rem;">
+                        <span style="font-family:monospace;font-weight:700;color:var(--amber-text);font-size:0.85rem;letter-spacing:0.1em;">{{ p.verification_code }}</span>
+                    </td>
+                    <td style="padding:0.75rem 0.6rem;font-feature-settings:'tnum';">¥{{ p.amount_yuan }}</td>
+                    <td style="padding:0.75rem 0.6rem;font-feature-settings:'tnum';">+{{ p.credits }}</td>
+                    <td style="padding:0.75rem 0.6rem;">
+                        {% if p.status == 'verified' %}
+                        <span class="badge badge-low">已验证</span>
+                        {% elif p.status == 'pending' %}
+                        <span class="badge badge-medium">待处理</span>
+                        {% else %}
+                        <span class="badge badge-high">已拒绝</span>
+                        {% endif %}
+                    </td>
+                    <td style="padding:0.75rem 0.6rem;color:var(--text-muted);font-size:0.78rem;white-space:nowrap;">{{ p.created_at.strftime('%m-%d %H:%M') if p.created_at else '' }}</td>
+                    <td style="padding:0.75rem 1.2rem;text-align:center;">
+                        {% if p.status == 'pending' %}
+                        <div style="display:flex;gap:0.4rem;justify-content:center;">
+                            <form method="post" action="/admin/verify/{{ p.id }}/approve" style="display:inline;" onsubmit="return confirm('确认通过？将为用户充值 {{ p.credits }} 次')">
+                                <button type="submit" class="tag-pill tag-selected" style="font-size:0.72rem;padding:0.25rem 0.8rem;cursor:pointer;">通过</button>
+                            </form>
+                            <form method="post" action="/admin/verify/{{ p.id }}/reject" style="display:inline;" onsubmit="return confirm('确认拒绝？')">
+                                <button type="submit" class="tag-pill" style="font-size:0.72rem;padding:0.25rem 0.8rem;color:var(--accent);border-color:rgba(255,36,66,0.3);cursor:pointer;">拒绝</button>
+                            </form>
+                        </div>
+                        {% else %}
+                        <span style="color:var(--text-muted);font-size:0.78rem;">{{ p.remark or '—' }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div style="text-align:center;padding:3rem 0;color:var(--text-muted);font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;">
+        <p style="font-size:1.2rem;margin:0 0 0.5rem;">暂无记录</p>
+        <p style="font-size:0.85rem;margin:0;">还没有人提交付款验证</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

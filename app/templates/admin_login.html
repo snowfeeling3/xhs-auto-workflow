@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+{% block title %}管理后台 — AI 小红书爆款生成器{% endblock %}
+
+{% block content %}
+<div style="min-height:60vh;display:flex;align-items:center;justify-content:center;padding:3rem 0;">
+<div class="card animate-fade-in-up" style="padding:2.5rem;width:100%;max-width:24rem;">
+    <div style="text-align:center;margin-bottom:2rem;">
+        <span style="display:inline-block;font-size:0.68rem;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.75rem;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;">Admin Panel</span>
+        <h2 style="font-size:1.4rem;font-weight:700;margin:0;letter-spacing:-0.01em;">管理后台</h2>
+    </div>
+
+    <form method="post" action="/admin/login">
+        <label class="section-label" style="margin-bottom:0.5rem;">管理密钥</label>
+        <input type="password" name="key" placeholder="输入 ADMIN_KEY" class="input-dark" style="margin-bottom:1.5rem;" autofocus>
+        <button type="submit" class="btn-accent" style="width:100%;">登录</button>
+    </form>
+</div>
+</div>
+{% endblock %}
