@@ -78,7 +78,7 @@ def _format_content_html(text: str) -> str:
     # Image placeholders
     text = re.sub(
         r'\[插入图片[：:]\s*(.+?)\]',
-        r'<div class="image-card"><div class="image-card-icon">&#128247;</div><div class="image-card-desc">\1</div></div>',
+        r'<div class="image-card-ink"><div class="image-card-ink-icon">&#128247;</div><div class="image-card-ink-desc">\1</div></div>',
         text,
     )
     # Paragraphs

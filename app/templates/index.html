@@ -4,26 +4,26 @@
 {% block content %}
 <!-- Hero -->
 <section style="padding:3.5rem 0 1.5rem;">
-    <div class="animate-fade-in-up stagger-1">
-        <span style="display:inline-block;font-size:0.72rem;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent);margin-bottom:1.25rem;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;">Content Studio</span>
+    <div class="ink-rise ink-rise-s1">
+        <span style="display:inline-block;font-size:0.72rem;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--paper-muted);margin-bottom:1.25rem;font-family:var(--font-body);">Content Studio</span>
     </div>
-    <h1 class="animate-fade-in-up stagger-2" style="font-size:clamp(2.6rem, 5.5vw, 3.8rem);font-weight:800;line-height:1.1;letter-spacing:-0.025em;margin:0 0 1rem;">
+    <h1 class="ink-rise ink-rise-s2" style="font-size:clamp(2.6rem, 5.5vw, 3.8rem);font-weight:800;line-height:1.1;letter-spacing:-0.025em;margin:0 0 1rem;">
         <span style="display:block;">用 AI 打造</span>
         <span style="display:block;">
-            <span style="color:var(--accent);">小红书</span> 爆款笔记
+            <span style="color:var(--cinnabar);">小红书</span> 爆款笔记
         </span>
     </h1>
-    <p class="animate-fade-in-up stagger-3" style="font-size:1.05rem;color:var(--text-secondary);max-width:30rem;line-height:1.7;margin:1.5rem 0 0;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;">
+    <p class="ink-rise ink-rise-s3" style="font-size:1.05rem;color:var(--paper-secondary);max-width:30rem;line-height:1.7;margin:1.5rem 0 0;font-family:var(--font-body);">
         主题 + 方向描述 + 风格偏好，AI 完成选题、文案、优化、合规审核。
     </p>
 </section>
 
 <!-- Trending Topics -->
-<section id="trending-section" class="animate-fade-in-up stagger-3" style="margin-bottom:1.5rem;display:none;">
-    <div class="card" style="padding:1.5rem;">
+<section id="trending-section" class="ink-rise ink-rise-s3" style="margin-bottom:1.5rem;display:none;">
+    <div class="ink-card" style="padding:1.5rem;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
-            <span class="section-label" style="margin-bottom:0;">今日热搜趋势</span>
-            <span id="trending-date" style="font-size:0.72rem;color:var(--text-muted);font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;"></span>
+            <span class="label-ink" style="margin-bottom:0;">今日热搜趋势</span>
+            <span id="trending-date" style="font-size:0.72rem;color:var(--paper-muted);font-family:var(--font-body);"></span>
         </div>
         <div style="overflow-x:auto;">
             <table class="trending-table">
@@ -39,102 +39,102 @@
                 <tbody id="trending-tbody"></tbody>
             </table>
         </div>
-        <p style="text-align:center;color:var(--text-muted);font-size:0.7rem;margin-top:0.8rem;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;">
+        <p style="text-align:center;color:var(--paper-muted);font-size:0.7rem;margin-top:0.8rem;font-family:var(--font-body);">
             每日 8:00 更新 · 由 AI 基于小红书社区趋势生成
         </p>
     </div>
 </section>
 
 <!-- Form Card -->
-<div class="card animate-fade-in-up stagger-3" style="padding:2rem;">
+<div class="ink-card ink-rise ink-rise-s3" style="padding:2rem;">
     <form id="generate-form" style="display:flex;flex-direction:column;">
         <!-- 1. 主题 -->
-        <div class="form-group">
-            <label for="topic" class="section-label">主题方向</label>
+        <div style="margin-bottom:1.5rem;">
+            <label for="topic" class="label-ink">主题方向</label>
             <div id="quick-tags" style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.85rem;">
-                <button type="button" data-topic="情感" class="tag-pill">情感</button>
-                <button type="button" data-topic="职场" class="tag-pill">职场</button>
-                <button type="button" data-topic="留学" class="tag-pill">留学</button>
-                <button type="button" data-topic="护肤" class="tag-pill">护肤</button>
-                <button type="button" data-topic="穿搭" class="tag-pill">穿搭</button>
-                <button type="button" data-topic="美食" class="tag-pill">美食</button>
-                <button type="button" data-topic="健身" class="tag-pill">健身</button>
-                <button type="button" data-topic="母婴" class="tag-pill">母婴</button>
+                <button type="button" data-topic="情感" class="tag-ink">情感</button>
+                <button type="button" data-topic="职场" class="tag-ink">职场</button>
+                <button type="button" data-topic="留学" class="tag-ink">留学</button>
+                <button type="button" data-topic="护肤" class="tag-ink">护肤</button>
+                <button type="button" data-topic="穿搭" class="tag-ink">穿搭</button>
+                <button type="button" data-topic="美食" class="tag-ink">美食</button>
+                <button type="button" data-topic="健身" class="tag-ink">健身</button>
+                <button type="button" data-topic="母婴" class="tag-ink">母婴</button>
             </div>
             <input
                 type="text"
                 id="topic"
                 name="topic"
                 placeholder="或输入自定义方向，如：大学生副业、租房改造、面试技巧..."
-                class="input-dark"
+                class="input-ink"
                 required
             >
         </div>
 
         <!-- 2. 方向描述 -->
-        <div class="form-group">
-            <label for="description" class="section-label">方向描述 <span style="font-weight:400;color:var(--text-muted);font-style:italic;text-transform:none;letter-spacing:0.02em;font-size:0.75rem;">— 可选</span></label>
+        <div style="margin-bottom:1.5rem;">
+            <label for="description" class="label-ink">方向描述 <span style="font-weight:400;color:var(--paper-muted);font-style:italic;text-transform:none;letter-spacing:0.02em;font-size:0.75rem;">— 可选</span></label>
             <textarea
                 id="description"
                 name="description"
                 rows="3"
                 placeholder="描述你想写的内容细节，越具体 AI 产出越精准。&#10;例如：我想写敏感肌平价面霜推荐，主打积雪草成分，定价50元左右，面向学生党，突出性价比和温和配方..."
-                class="input-dark"
+                class="input-ink"
                 style="resize:vertical;min-height:5rem;line-height:1.7;"
             ></textarea>
         </div>
 
         <!-- 3. 笔记类型 -->
-        <div class="form-group">
-            <label class="section-label">笔记类型 <span style="font-weight:400;color:var(--text-muted);font-style:italic;text-transform:none;letter-spacing:0.02em;font-size:0.75rem;">— 可选</span></label>
+        <div style="margin-bottom:1.5rem;">
+            <label class="label-ink">笔记类型 <span style="font-weight:400;color:var(--paper-muted);font-style:italic;text-transform:none;letter-spacing:0.02em;font-size:0.75rem;">— 可选</span></label>
             <div class="tag-group" data-field="style" style="display:flex;flex-wrap:wrap;gap:0.5rem;">
-                <button type="button" data-value="干货教程" class="tag-pill tag-selectable">干货教程</button>
-                <button type="button" data-value="经验分享" class="tag-pill tag-selectable">经验分享</button>
-                <button type="button" data-value="好物测评" class="tag-pill tag-selectable">好物测评</button>
-                <button type="button" data-value="情感共鸣" class="tag-pill tag-selectable">情感共鸣</button>
-                <button type="button" data-value="Vlog脚本" class="tag-pill tag-selectable">Vlog脚本</button>
-                <button type="button" data-value="避坑指南" class="tag-pill tag-selectable">避坑指南</button>
+                <button type="button" data-value="干货教程" class="tag-ink tag-selectable">干货教程</button>
+                <button type="button" data-value="经验分享" class="tag-ink tag-selectable">经验分享</button>
+                <button type="button" data-value="好物测评" class="tag-ink tag-selectable">好物测评</button>
+                <button type="button" data-value="情感共鸣" class="tag-ink tag-selectable">情感共鸣</button>
+                <button type="button" data-value="Vlog脚本" class="tag-ink tag-selectable">Vlog脚本</button>
+                <button type="button" data-value="避坑指南" class="tag-ink tag-selectable">避坑指南</button>
             </div>
-            <input type="text" class="input-dark custom-tag-input" data-field="style"
+            <input type="text" class="input-ink custom-tag-input" data-field="style"
                 placeholder="或输入自定义类型，如：测评合集、教程连载..."
-                style="display:none;">
-            <button type="button" class="btn-ghost toggle-custom-btn" data-field="style">+ 自定义</button>
+                style="display:none;margin-top:0.5rem;">
+            <button type="button" class="btn-ink toggle-custom-btn" data-field="style" style="margin-top:0.5rem;">+ 自定义</button>
         </div>
 
         <!-- 4. 文案长度 -->
-        <div class="form-group">
-            <label class="section-label">文案长度 <span style="font-weight:400;color:var(--text-muted);font-style:italic;text-transform:none;letter-spacing:0.02em;font-size:0.75rem;">— 可选</span></label>
+        <div style="margin-bottom:1.5rem;">
+            <label class="label-ink">文案长度 <span style="font-weight:400;color:var(--paper-muted);font-style:italic;text-transform:none;letter-spacing:0.02em;font-size:0.75rem;">— 可选</span></label>
             <div class="tag-group" data-field="length" style="display:flex;flex-wrap:wrap;gap:0.5rem;">
-                <button type="button" data-value="短篇（~300字）" class="tag-pill tag-selectable">短篇 ~300字</button>
-                <button type="button" data-value="中篇（~500-800字）" class="tag-pill tag-selectable">中篇 500-800字</button>
-                <button type="button" data-value="长篇（~1000+字）" class="tag-pill tag-selectable">长篇 1000+字</button>
+                <button type="button" data-value="短篇（~300字）" class="tag-ink tag-selectable">短篇 ~300字</button>
+                <button type="button" data-value="中篇（~500-800字）" class="tag-ink tag-selectable">中篇 500-800字</button>
+                <button type="button" data-value="长篇（~1000+字）" class="tag-ink tag-selectable">长篇 1000+字</button>
             </div>
         </div>
 
         <!-- 5. 语言风格 -->
-        <div class="form-group">
-            <label class="section-label">语言风格 <span style="font-weight:400;color:var(--text-muted);font-style:italic;text-transform:none;letter-spacing:0.02em;font-size:0.75rem;">— 可选</span></label>
+        <div style="margin-bottom:1.5rem;">
+            <label class="label-ink">语言风格 <span style="font-weight:400;color:var(--paper-muted);font-style:italic;text-transform:none;letter-spacing:0.02em;font-size:0.75rem;">— 可选</span></label>
             <div class="tag-group" data-field="tone" style="display:flex;flex-wrap:wrap;gap:0.5rem;">
-                <button type="button" data-value="口语化/年轻化" class="tag-pill tag-selectable">口语化/年轻化</button>
-                <button type="button" data-value="正式/专业" class="tag-pill tag-selectable">正式/专业</button>
-                <button type="button" data-value="治愈/温暖" class="tag-pill tag-selectable">治愈/温暖</button>
-                <button type="button" data-value="犀利/敢说" class="tag-pill tag-selectable">犀利/敢说</button>
+                <button type="button" data-value="口语化/年轻化" class="tag-ink tag-selectable">口语化/年轻化</button>
+                <button type="button" data-value="正式/专业" class="tag-ink tag-selectable">正式/专业</button>
+                <button type="button" data-value="治愈/温暖" class="tag-ink tag-selectable">治愈/温暖</button>
+                <button type="button" data-value="犀利/敢说" class="tag-ink tag-selectable">犀利/敢说</button>
             </div>
-            <input type="text" class="input-dark custom-tag-input" data-field="tone"
+            <input type="text" class="input-ink custom-tag-input" data-field="tone"
                 placeholder="或输入自定义风格，如：毒舌吐槽、学术严谨..."
-                style="display:none;">
-            <button type="button" class="btn-ghost toggle-custom-btn" data-field="tone">+ 自定义</button>
+                style="display:none;margin-top:0.5rem;">
+            <button type="button" class="btn-ink toggle-custom-btn" data-field="tone" style="margin-top:0.5rem;">+ 自定义</button>
         </div>
 
-        <div id="error-msg" style="display:none;padding:0.9rem 1.1rem;border-radius:var(--radius-md);background:rgba(255,36,66,0.06);border:1px solid rgba(255,36,66,0.2);color:var(--accent);font-size:0.875rem;margin:1rem 0 0;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;"></div>
+        <div id="error-msg" class="alert-cinnabar" style="display:none;margin:1rem 0 0;"></div>
 
-        <div id="no-credits-msg" style="display:none;padding:1rem 1.1rem;border-radius:var(--radius-md);background:rgba(255,36,66,0.04);border:1px solid rgba(255,36,66,0.15);margin:1rem 0 0;text-align:center;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;">
-            <p style="color:var(--accent);font-weight:600;font-size:0.95rem;margin:0 0 0.5rem;">积分不足</p>
-            <p style="color:var(--text-secondary);font-size:0.85rem;margin:0 0 0.8rem;">￥1.00 = 3次生成，扫码即可充值</p>
-            <a href="/payment" class="btn-accent" style="font-size:0.85rem;padding:0.55rem 1.5rem;">去充值</a>
+        <div id="no-credits-msg" style="display:none;padding:1rem 1.1rem;border-radius:var(--radius-md);background:rgba(212,69,59,0.04);border:1px solid rgba(212,69,59,0.15);margin:1rem 0 0;text-align:center;font-family:var(--font-body);">
+            <p style="color:var(--cinnabar);font-weight:600;font-size:0.95rem;margin:0 0 0.5rem;">积分不足</p>
+            <p style="color:var(--paper-secondary);font-size:0.85rem;margin:0 0 0.8rem;">￥1.00 = 3次生成，扫码即可充值</p>
+            <a href="/payment" class="btn-cinnabar" style="font-size:0.85rem;padding:0.55rem 1.5rem;">去充值</a>
         </div>
 
-        <button type="submit" id="submit-btn" class="btn-accent" style="width:100%;margin-top:1.5rem;">
+        <button type="submit" id="submit-btn" class="btn-cinnabar" style="width:100%;margin-top:1.5rem;">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 7.2h7.6l-6 4.8 2.4 7.2-6.4-4.8-6.4 4.8 2.4-7.2-6-4.8h7.6z"/></svg>
             生成文案
         </button>
@@ -142,20 +142,20 @@
 
     <!-- Loading State -->
     <div id="loading" style="display:none;text-align:center;padding:3rem 0 2rem;">
-        <div class="loading-dots" style="justify-content:center;margin-bottom:1.5rem;">
+        <div class="loading-ink" style="justify-content:center;margin-bottom:1.5rem;">
             <span></span><span></span><span></span>
         </div>
-        <p style="color:var(--text-secondary);font-size:0.95rem;letter-spacing:0.03em;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;">AI 正在为你创作中，请稍候…</p>
+        <p style="color:var(--paper-secondary);font-size:0.95rem;letter-spacing:0.03em;font-family:var(--font-body);">AI 正在为你创作中，请稍候…</p>
     </div>
 </div>
 
 <!-- Feature intro -->
-<p class="animate-fade-in-up stagger-4" style="text-align:center;color:var(--text-muted);font-size:0.75rem;letter-spacing:0.08em;padding:1.2rem 0 0.3rem;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;">
+<p class="ink-rise ink-rise-s4" style="text-align:center;color:var(--paper-muted);font-size:0.75rem;letter-spacing:0.08em;padding:1.2rem 0 0.3rem;font-family:var(--font-body);">
     AI 智能创作 &nbsp;·&nbsp; 爆款优化 &nbsp;·&nbsp; 合规检测
 </p>
-<p class="animate-fade-in-up stagger-4" style="text-align:center;padding-bottom:2rem;">
-    <a href="/history" style="font-size:0.75rem;color:var(--text-muted);text-decoration:none;transition:color 0.2s;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;"
-       onmouseenter="this.style.color='var(--text-primary)'" onmouseleave="this.style.color='var(--text-muted)'">
+<p class="ink-rise ink-rise-s4" style="text-align:center;padding-bottom:2rem;">
+    <a href="/history" style="font-size:0.75rem;color:var(--paper-muted);text-decoration:none;transition:color 0.2s;font-family:var(--font-body);"
+       onmouseenter="this.style.color='var(--paper-white)'" onmouseleave="this.style.color='var(--paper-muted)'">
         查看历史记录 →
     </a>
 </p>
@@ -178,7 +178,7 @@
     }
 
     // 主题快捷标签 — 填充到输入框
-    document.querySelectorAll('#quick-tags .tag-pill').forEach(function(tag) {
+    document.querySelectorAll('#quick-tags .tag-ink').forEach(function(tag) {
         tag.addEventListener('click', function() {
             topicInput.value = this.dataset.topic;
             topicInput.focus();
@@ -192,10 +192,10 @@
             if (!btn) return;
             var prev = group.querySelector('.tag-selected');
             if (prev === btn) {
-                btn.classList.remove('tag-selected');
+                btn.classList.remove('tag-lit', 'tag-selected');
             } else {
-                if (prev) prev.classList.remove('tag-selected');
-                btn.classList.add('tag-selected');
+                if (prev) prev.classList.remove('tag-lit', 'tag-selected');
+                btn.classList.add('tag-lit', 'tag-selected');
             }
         });
     });
@@ -299,17 +299,17 @@
             data.topics.forEach(function(t) {
                 var tr = document.createElement('tr');
                 tr.innerHTML =
-                    '<td class="' + (t.rank <= 3 ? 'trending-rank-hot' : '') + '" style="font-feature-settings:\'tnum\';">' + t.rank + '</td>' +
-                    '<td><span class="trending-topic-name">' + escapeHtml(t.topic_name) + '</span></td>' +
-                    '<td style="color:var(--text-muted);white-space:nowrap;">' + escapeHtml(t.category) + '</td>' +
-                    '<td class="trending-rank-hot" style="white-space:nowrap;">' + escapeHtml(t.heat_desc) + '</td>' +
-                    '<td style="color:var(--text-secondary);max-width:14rem;">' + escapeHtml(t.trend_reason) + '</td>';
+                    '<td class="trending-rank" style="font-feature-settings:\'tnum\';">' + t.rank + '</td>' +
+                    '<td><span class="trending-topic">' + escapeHtml(t.topic_name) + '</span></td>' +
+                    '<td style="color:var(--paper-muted);white-space:nowrap;">' + escapeHtml(t.category) + '</td>' +
+                    '<td style="color:var(--cinnabar);font-weight:600;white-space:nowrap;">' + escapeHtml(t.heat_desc) + '</td>' +
+                    '<td style="color:var(--paper-secondary);max-width:14rem;">' + escapeHtml(t.trend_reason) + '</td>';
                 tbody.appendChild(tr);
             });
 
             // Click topic name to fill input
             tbody.addEventListener('click', function(e) {
-                var nameEl = e.target.closest('.trending-topic-name');
+                var nameEl = e.target.closest('.trending-topic');
                 if (nameEl && nameEl.textContent) {
                     topicInput.value = nameEl.textContent.trim();
                     topicInput.focus();

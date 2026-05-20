@@ -3,38 +3,38 @@
 
 {% block content %}
 <!-- Back nav -->
-<a href="/" class="back-link">
+<a href="/" class="back-ink">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5m7-7l-7 7 7 7"/></svg>
     返回首页
 </a>
 
 <!-- Article card -->
-<article class="card animate-fade-in-up stagger-1" style="overflow:hidden;margin-bottom:1.25rem;">
+<article class="ink-card ink-rise ink-rise-s1" style="overflow:hidden;margin-bottom:1.25rem;">
     <!-- Header bar -->
-    <header style="padding:1.5rem 2rem;border-bottom:1px solid var(--border-subtle);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;">
+    <header style="padding:1.5rem 2rem;border-bottom:1px solid var(--ink-border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;">
         <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
-            <h1 style="font-size:1.05rem;font-weight:700;letter-spacing:0.04em;margin:0;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;">生成结果</h1>
-            <span class="badge
-                {% if post.risk_level == 'low' %}badge-low
-                {% elif post.risk_level == 'medium' %}badge-medium
-                {% else %}badge-high{% endif %}">
+            <h1 style="font-size:1.05rem;font-weight:700;letter-spacing:0.04em;margin:0;font-family:var(--font-body);">生成结果</h1>
+            <span class="seal
+                {% if post.risk_level == 'low' %}seal-jade
+                {% elif post.risk_level == 'medium' %}seal-gold
+                {% else %}seal-cinnabar{% endif %}">
                 {% if post.risk_level == 'low' %}低风险
                 {% elif post.risk_level == 'medium' %}中风险
                 {% else %}高风险{% endif %}
             </span>
         </div>
         <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
-            <button id="copy-btn" class="btn-ghost"
+            <button id="copy-btn" class="btn-ink"
                 data-copy-title="{{ post.title | e }}"
                 data-copy-content="{{ post.content | e }}">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
                 <span id="copy-text">一键复制</span>
             </button>
-            <a href="/?topic={{ post.topic | urlencode }}" class="btn-ghost" style="font-size:0.85rem;">
+            <a href="/?topic={{ post.topic | urlencode }}" class="btn-ink" style="font-size:0.85rem;">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
                 再生成同主题
             </a>
-            <a href="/" class="btn-accent" style="font-size:0.85rem;padding:0.55rem 1.1rem;">
+            <a href="/" class="btn-cinnabar" style="font-size:0.85rem;padding:0.55rem 1.1rem;">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 7.2h7.6l-6 4.8 2.4 7.2-6.4-4.8-6.4 4.8 2.4-7.2-6-4.8h7.6z"/></svg>
                 新创作
             </a>
@@ -42,7 +42,7 @@
     </header>
 
     <!-- Stats row -->
-    <div class="stats-row" style="padding:0.75rem 2rem 0;border-bottom:1px solid var(--border-subtle);">
+    <div class="stats-row-ink" style="padding:0.75rem 2rem 0;border-bottom:1px solid var(--ink-border);">
         <span>标题 {{ title_len }} 字</span>
         <span>正文 {{ content_len }} 字</span>
         <span>标签 {{ tag_count }} 个</span>
@@ -53,27 +53,27 @@
     <div style="padding:2rem;">
         <!-- Title section -->
         <section style="margin-bottom:2rem;">
-            <span class="section-label">标题</span>
+            <span class="label-ink">标题</span>
             <h2 class="article-title" style="margin:0.5rem 0 0;">{{ post.title }}</h2>
         </section>
 
-        <hr class="hr-fade" style="margin-bottom:2rem;">
+        <hr class="hr-ink" style="margin-bottom:2rem;">
 
         <!-- Body section -->
         <section style="margin-bottom:2rem;">
-            <span class="section-label">正文</span>
+            <span class="label-ink">正文</span>
             <div class="article-body" style="margin-top:0.5rem;">{{ content_html | safe }}</div>
         </section>
 
         {% if tags_list %}
-        <hr class="hr-fade" style="margin-bottom:1.5rem;">
+        <hr class="hr-ink" style="margin-bottom:1.5rem;">
 
         <!-- Tags section -->
         <section>
-            <span class="section-label" style="margin-bottom:0.6rem;">标签</span>
+            <span class="label-ink" style="margin-bottom:0.6rem;">标签</span>
             <div style="display:flex;flex-wrap:wrap;gap:0.4rem;">
                 {% for t in tags_list %}
-                    <span class="content-tag">#{{ t }}</span>
+                    <span class="tag-content">#{{ t }}</span>
                 {% endfor %}
             </div>
         </section>
@@ -83,11 +83,11 @@
 
 <!-- Timestamp + nav -->
 <div style="text-align:center;padding-bottom:2rem;display:flex;flex-direction:column;align-items:center;gap:0.5rem;">
-    <p style="font-size:0.78rem;color:var(--text-muted);letter-spacing:0.04em;font-feature-settings:'tnum';font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;">
+    <p style="font-size:0.78rem;color:var(--paper-muted);letter-spacing:0.04em;font-feature-settings:'tnum';font-family:var(--font-body);">
         生成时间：{{ post.created_at.strftime('%Y-%m-%d %H:%M') if post.created_at else '' }}
     </p>
-    <a href="/history" style="font-size:0.75rem;color:var(--text-muted);text-decoration:none;transition:color 0.2s;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;"
-       onmouseenter="this.style.color='var(--text-primary)'" onmouseleave="this.style.color='var(--text-muted)'">
+    <a href="/history" style="font-size:0.75rem;color:var(--paper-muted);text-decoration:none;transition:color 0.2s;font-family:var(--font-body);"
+       onmouseenter="this.style.color='var(--paper-white)'" onmouseleave="this.style.color='var(--paper-muted)'">
         查看历史记录 →
     </a>
 </div>
@@ -106,10 +106,10 @@
 
         navigator.clipboard.writeText(text).then(function() {
             copyText.textContent = '已复制';
-            copyBtn.style.color = 'var(--green-text)';
-            copyBtn.style.borderColor = 'rgba(52,211,153,0.3)';
-            copyBtn.style.background = 'var(--green-subtle)';
-            copyBtn.style.animation = 'copy-flash 0.5s ease';
+            copyBtn.style.color = 'var(--jade)';
+            copyBtn.style.borderColor = 'rgba(107,155,122,0.3)';
+            copyBtn.style.background = 'var(--jade-subtle)';
+            copyBtn.style.animation = 'stamp 0.5s ease';
 
             setTimeout(function() {
                 copyText.textContent = '一键复制';

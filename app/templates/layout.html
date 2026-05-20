@@ -3,137 +3,149 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}AI 小红书爆款生成器{% endblock %}</title>
+    <title>{% block title %}墨染 · AI 小红书爆款生成器{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.1/dist/tailwind.min.css" rel="stylesheet">
     <style>
+        /* ══════════════════════════════════
+           Ink Studio · 墨色画室
+           色彩：墨底 × 宣纸白 × 朱砂红 × 松烟灰
+           ══════════════════════════════════ */
+
         :root {
-            --bg-deep: #09090B;
-            --bg-surface: #131316;
-            --bg-card: #1A1A1F;
-            --bg-card-hover: #1F1F25;
-            --border-subtle: #252530;
-            --border-active: #3A3A48;
-            --text-primary: #EDEDF0;
-            --text-secondary: #8E8E98;
-            --text-muted: #5C5C68;
-            --accent: #FF2442;
-            --accent-glow: rgba(255, 36, 66, 0.15);
-            --accent-solid: #E01E3A;
-            --green-subtle: rgba(52, 211, 153, 0.12);
-            --green-text: #6EE7B7;
-            --amber-subtle: rgba(251, 191, 36, 0.12);
-            --amber-text: #FCD34D;
-            --radius-sm: 0.5rem;
-            --radius-md: 0.75rem;
-            --radius-lg: 1rem;
-            --radius-xl: 1.25rem;
+            --ink-black: #0A0A0C;
+            --ink-deep: #0F0F13;
+            --ink-surface: #15151B;
+            --ink-card: #1A1A22;
+            --ink-card-hover: #20202B;
+            --ink-border: #252530;
+            --ink-border-active: #333348;
+            --paper-white: #E8E4DF;
+            --paper-secondary: #9E9A93;
+            --paper-muted: #5E5B56;
+            --cinnabar: #D4453B;
+            --cinnabar-glow: rgba(212, 69, 59, 0.15);
+            --cinnabar-deep: #B8372E;
+            --gold: #C4A45A;
+            --gold-subtle: rgba(196, 164, 90, 0.12);
+            --jade: #6B9B7A;
+            --jade-subtle: rgba(107, 155, 122, 0.12);
+            --radius-sm: 0.375rem;
+            --radius-md: 0.625rem;
+            --radius-lg: 0.875rem;
+            --radius-xl: 1.125rem;
+            --font-display: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "SimSun", "STSong", serif;
+            --font-body: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+            --font-mono: "SF Mono", "Cascadia Code", "JetBrains Mono", "Fira Code", "Source Code Pro", monospace;
         }
 
-        * { box-sizing: border-box; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
+        /* ── 墨底基底 ── */
         body {
-            font-family: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", serif;
-            background-color: var(--bg-deep);
-            color: var(--text-primary);
+            font-family: var(--font-display);
+            background-color: var(--ink-black);
+            color: var(--paper-white);
             min-height: 100vh;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            line-height: 1.65;
         }
 
-        /* Grain texture overlay */
+        /* 宣纸纹理叠加 */
         body::before {
             content: '';
             position: fixed;
             inset: 0;
             z-index: 0;
             pointer-events: none;
-            opacity: 0.04;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-            background-size: 256px 256px;
+            opacity: 0.028;
+            background:
+                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.03) 2px, rgba(255,255,255,0.03) 3px),
+                url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-size: auto, 400px 400px;
         }
 
-        /* Ambient glow — top red, bottom subtle */
+        /* 环境光 —— 上方暖红，下方微金 */
         body::after {
             content: '';
             position: fixed;
-            top: -30%;
+            top: -20%;
             left: 50%;
             transform: translateX(-50%);
-            width: 900px;
-            height: 650px;
+            width: 1000px;
+            height: 700px;
             z-index: 0;
             pointer-events: none;
             background:
-                radial-gradient(ellipse at 50% 0%, var(--accent-glow) 0%, transparent 70%),
-                radial-gradient(ellipse at 50% 100%, rgba(138, 138, 160, 0.04) 0%, transparent 50%);
+                radial-gradient(ellipse at 50% 0%, var(--cinnabar-glow) 0%, transparent 60%),
+                radial-gradient(ellipse at 50% 100%, rgba(196, 164, 90, 0.04) 0%, transparent 45%);
         }
 
-        /* Custom scrollbar */
-        ::-webkit-scrollbar { width: 5px; }
+        /* ── 滚动条 ── */
+        ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: var(--border-active); border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+        ::-webkit-scrollbar-thumb { background: var(--ink-border-active); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--paper-muted); }
 
-        /* Selection */
-        ::selection {
-            background: rgba(255, 36, 66, 0.25);
-            color: #fff;
-        }
+        /* ── 选中 ── */
+        ::selection { background: rgba(212, 69, 59, 0.25); color: var(--paper-white); }
 
-        /* ── Animations ── */
-        @keyframes fade-in-up {
-            from { opacity: 0; transform: translateY(28px); }
+        /* ── 动画关键帧 ── */
+        @keyframes rise {
+            from { opacity: 0; transform: translateY(32px); }
             to   { opacity: 1; transform: translateY(0); }
         }
-        @keyframes fade-in {
+        @keyframes appear {
             from { opacity: 0; }
             to   { opacity: 1; }
         }
-        @keyframes pulse-dot {
-            0%, 100% { transform: scale(1); opacity: 0.4; }
-            50%      { transform: scale(1.4); opacity: 1; }
-        }
-        @keyframes shimmer {
-            0%   { background-position: -200% 0; }
-            100% { background-position: 200% 0; }
+        @keyframes ink-spread {
+            from { clip-path: inset(0 100% 0 0); }
+            to   { clip-path: inset(0 0 0 0); }
         }
         @keyframes breathe {
-            0%, 100% { box-shadow: 0 0 0 0 var(--accent-glow); }
-            50%      { box-shadow: 0 0 0 8px transparent; }
+            0%, 100% { box-shadow: 0 0 0 0 var(--cinnabar-glow); }
+            50%      { box-shadow: 0 0 0 12px transparent; }
         }
-        @keyframes copy-flash {
-            0%   { background: var(--green-subtle); }
-            100% { background: transparent; }
+        @keyframes float-up {
+            0%   { transform: translateY(0); opacity: 0.4; }
+            100% { transform: translateY(-6px); opacity: 1; }
         }
-        @keyframes scale-in {
-            from { transform: scale(0.92); opacity: 0; }
+        @keyframes shiver {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-1px); }
+            75% { transform: translateX(1px); }
+        }
+        @keyframes stamp {
+            from { transform: scale(1.15); opacity: 0; }
             to   { transform: scale(1); opacity: 1; }
         }
 
-        .animate-fade-in-up {
-            animation: fade-in-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
-        }
-        .animate-fade-in {
-            animation: fade-in 0.5s ease-out both;
-        }
-        .animate-scale-in {
-            animation: scale-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+        .ink-rise       { animation: rise 0.8s cubic-bezier(0.16, 1, 0.3, 1) both; }
+        .ink-rise-s1    { animation-delay: 0.05s; }
+        .ink-rise-s2    { animation-delay: 0.12s; }
+        .ink-rise-s3    { animation-delay: 0.20s; }
+        .ink-rise-s4    { animation-delay: 0.28s; }
+        .ink-rise-s5    { animation-delay: 0.36s; }
+        .ink-appear     { animation: appear 0.5s ease-out both; }
+
+        /* ── 容器 ── */
+        .container-ink {
+            width: 100%;
+            max-width: 46rem;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+            position: relative;
+            z-index: 1;
         }
 
-        /* Stagger delays */
-        .stagger-1 { animation-delay: 0.04s; }
-        .stagger-2 { animation-delay: 0.10s; }
-        .stagger-3 { animation-delay: 0.16s; }
-        .stagger-4 { animation-delay: 0.22s; }
-        .stagger-5 { animation-delay: 0.28s; }
-
-        /* ── Primary button ── */
-        .btn-accent {
+        /* ── 按钮：朱砂主按钮 ── */
+        .btn-cinnabar {
             display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
-            background: var(--accent);
+            background: var(--cinnabar);
             color: #fff;
             font-weight: 600;
             font-size: 0.95rem;
@@ -141,494 +153,434 @@
             border-radius: var(--radius-md);
             border: none;
             cursor: pointer;
-            letter-spacing: 0.04em;
-            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            letter-spacing: 0.06em;
+            font-family: var(--font-body);
+            transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
             position: relative;
-            overflow: hidden;
             text-decoration: none;
-            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+            box-shadow: 0 2px 8px rgba(212, 69, 59, 0.3);
         }
-        .btn-accent::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, transparent 35%, rgba(255,255,255,0.06) 48%, transparent 65%);
-            background-size: 200% 100%;
-            animation: shimmer 4s infinite;
-        }
-        .btn-accent:hover {
-            background: var(--accent-solid);
-            box-shadow: 0 4px 28px var(--accent-glow), 0 1px 4px rgba(0,0,0,0.3);
+        .btn-cinnabar:hover {
+            background: var(--cinnabar-deep);
+            box-shadow: 0 6px 28px var(--cinnabar-glow), 0 2px 4px rgba(0,0,0,0.3);
             transform: translateY(-1px);
         }
-        .btn-accent:active {
-            transform: translateY(0) scale(0.985);
+        .btn-cinnabar:active {
+            transform: translateY(0) scale(0.98);
             box-shadow: none;
-            transition-duration: 0.08s;
+            transition-duration: 0.06s;
         }
-        .btn-accent:disabled {
-            opacity: 0.4;
+        .btn-cinnabar:disabled {
+            opacity: 0.35;
             cursor: not-allowed;
             pointer-events: none;
-            filter: grayscale(0.3);
+            filter: grayscale(0.2);
         }
 
-        /* ── Ghost button ── */
-        .btn-ghost {
+        /* ── 按钮：素面次要按钮 ── */
+        .btn-ink {
             display: inline-flex;
             align-items: center;
             gap: 0.4rem;
             background: transparent;
-            color: var(--text-secondary);
+            color: var(--paper-secondary);
             font-weight: 500;
-            font-size: 0.85rem;
-            padding: 0.6rem 1.1rem;
+            font-size: 0.82rem;
+            padding: 0.55rem 1.1rem;
             border-radius: var(--radius-sm);
-            border: 1px solid var(--border-subtle);
+            border: 1px solid var(--ink-border);
             cursor: pointer;
             transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
             text-decoration: none;
-            letter-spacing: 0.03em;
-            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+            letter-spacing: 0.04em;
+            font-family: var(--font-body);
         }
-        .btn-ghost:hover {
-            color: var(--text-primary);
-            border-color: var(--border-active);
-            background: rgba(255,255,255,0.03);
-            transform: translateY(-1px);
+        .btn-ink:hover {
+            color: var(--paper-white);
+            border-color: var(--ink-border-active);
+            background: rgba(255,255,255,0.02);
         }
-        .btn-ghost:active {
-            transform: translateY(0) scale(0.985);
-            transition-duration: 0.08s;
-        }
+        .btn-ink:active { transform: scale(0.98); }
 
-        /* ── Card ── */
-        .card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-subtle);
+        /* ── 卡片 ── */
+        .ink-card {
+            background: var(--ink-card);
+            border: 1px solid var(--ink-border);
             border-radius: var(--radius-xl);
             transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            position: relative;
         }
-        .card:hover {
-            border-color: var(--border-active);
-            background: var(--bg-card-hover);
-            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+        .ink-card:hover {
+            border-color: var(--ink-border-active);
+            background: var(--ink-card-hover);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.35);
         }
 
-        /* ── Input ── */
-        .input-dark {
+        /* ── 输入框 ── */
+        .input-ink {
             width: 100%;
-            padding: 0.85rem 1.1rem;
-            background: var(--bg-surface);
-            border: 1px solid var(--border-subtle);
+            padding: 0.9rem 1.1rem;
+            background: var(--ink-deep);
+            border: 1px solid var(--ink-border);
             border-radius: var(--radius-md);
-            color: var(--text-primary);
+            color: var(--paper-white);
             font-size: 0.95rem;
             outline: none;
-            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-            letter-spacing: 0.01em;
-            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+            transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+            letter-spacing: 0.02em;
+            font-family: var(--font-body);
         }
-        .input-dark::placeholder {
-            color: var(--text-muted);
+        .input-ink::placeholder {
+            color: var(--paper-muted);
             font-style: italic;
-            opacity: 0.7;
+            opacity: 0.65;
         }
-        .input-dark:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px var(--accent-glow), 0 0 20px rgba(255,36,66,0.06);
+        .input-ink:focus {
+            border-color: var(--cinnabar);
+            box-shadow: 0 0 0 3px var(--cinnabar-glow), 0 0 30px rgba(212,69,59,0.05);
         }
-
-        textarea.input-dark {
-            font-family: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "PingFang SC", serif;
+        textarea.input-ink {
+            font-family: var(--font-display);
             font-style: normal;
+            line-height: 1.85;
         }
-        textarea.input-dark::placeholder {
-            font-style: normal;
-            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
-        }
+        textarea.input-ink::placeholder { font-style: normal; font-family: var(--font-body); }
 
-        /* ── Tag pills ── */
-        .tag-pill {
+        /* ── 标签 ── */
+        .tag-ink {
             display: inline-flex;
             align-items: center;
-            padding: 0.5rem 1.05rem;
+            padding: 0.45rem 1rem;
             border-radius: 100px;
-            font-size: 0.85rem;
+            font-size: 0.82rem;
             font-weight: 500;
             cursor: pointer;
             transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-            border: 1px solid var(--border-subtle);
-            background: var(--bg-surface);
-            color: var(--text-secondary);
-            letter-spacing: 0.03em;
+            border: 1px solid var(--ink-border);
+            background: var(--ink-surface);
+            color: var(--paper-secondary);
+            letter-spacing: 0.04em;
             user-select: none;
-            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
-            position: relative;
+            font-family: var(--font-body);
         }
-        .tag-pill:hover {
-            color: var(--text-primary);
-            border-color: rgba(255,36,66,0.4);
-            background: rgba(255,36,66,0.06);
+        .tag-ink:hover {
+            color: var(--paper-white);
+            border-color: rgba(212,69,59,0.35);
+            background: rgba(212,69,59,0.05);
             transform: translateY(-1px);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
         }
-        .tag-pill:active {
-            transform: scale(0.96);
-            transition-duration: 0.08s;
-        }
-        .tag-pill.tag-selected {
-            background: var(--accent);
+        .tag-ink.tag-lit {
+            background: var(--cinnabar);
             color: #fff;
-            border-color: var(--accent);
+            border-color: var(--cinnabar);
             font-weight: 600;
-            box-shadow: 0 2px 12px var(--accent-glow);
-            animation: scale-in 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+            box-shadow: 0 2px 12px var(--cinnabar-glow);
+            animation: stamp 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
         }
-        .tag-pill.tag-selected:hover {
-            background: var(--accent-solid);
-            border-color: var(--accent-solid);
-            box-shadow: 0 4px 18px var(--accent-glow);
-        }
+        .tag-ink.tag-lit:hover { background: var(--cinnabar-deep); }
 
-        /* ── Risk badges ── */
-        .badge {
+        /* ── 徽章 ── */
+        .seal {
             display: inline-flex;
             align-items: center;
             padding: 0.28rem 0.8rem;
             border-radius: 100px;
-            font-size: 0.72rem;
+            font-size: 0.7rem;
             font-weight: 600;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.06em;
             text-transform: uppercase;
-            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+            font-family: var(--font-body);
+            gap: 0.4rem;
         }
-        .badge::before {
+        .seal::before {
             content: '';
             display: inline-block;
-            width: 6px;
-            height: 6px;
+            width: 5px; height: 5px;
             border-radius: 50%;
-            margin-right: 0.45rem;
         }
-        .badge-low    {
-            background: var(--green-subtle);
-            color: var(--green-text);
-        }
-        .badge-low::before {
-            background: var(--green-text);
-            box-shadow: 0 0 6px rgba(110,231,183,0.5);
-        }
-        .badge-medium {
-            background: var(--amber-subtle);
-            color: var(--amber-text);
-        }
-        .badge-medium::before {
-            background: var(--amber-text);
-            box-shadow: 0 0 6px rgba(252,211,77,0.5);
-        }
-        .badge-high   {
-            background: var(--accent-glow);
-            color: var(--accent);
-        }
-        .badge-high::before {
-            background: var(--accent);
-            box-shadow: 0 0 6px var(--accent-glow);
-            animation: pulse-dot 2s ease-in-out infinite;
-        }
+        .seal-jade       { background: var(--jade-subtle); color: var(--jade); }
+        .seal-jade::before { background: var(--jade); box-shadow: 0 0 6px rgba(107,155,122,0.5); }
+        .seal-gold       { background: var(--gold-subtle); color: var(--gold); }
+        .seal-gold::before { background: var(--gold); box-shadow: 0 0 6px rgba(196,164,90,0.5); }
+        .seal-cinnabar   { background: var(--cinnabar-glow); color: var(--cinnabar); }
+        .seal-cinnabar::before { background: var(--cinnabar); box-shadow: 0 0 6px var(--cinnabar-glow); animation: breathe 2s ease-in-out infinite; }
 
-        /* ── Content tag ── */
-        .content-tag {
+        /* ── 内容标签 ── */
+        .tag-content {
             display: inline-flex;
             align-items: center;
-            padding: 0.4rem 0.9rem;
+            padding: 0.35rem 0.85rem;
             border-radius: 100px;
-            font-size: 0.82rem;
+            font-size: 0.8rem;
             font-weight: 500;
-            background: rgba(255, 36, 66, 0.06);
-            color: var(--accent);
-            letter-spacing: 0.02em;
-            transition: all 0.22s ease;
-            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: rgba(212, 69, 59, 0.05);
+            color: var(--cinnabar);
+            letter-spacing: 0.03em;
+            font-family: var(--font-body);
             border: 1px solid transparent;
+            transition: all 0.2s ease;
         }
-        .content-tag:hover {
-            background: var(--accent-glow);
-            border-color: rgba(255,36,66,0.2);
+        .tag-content:hover {
+            background: var(--cinnabar-glow);
+            border-color: rgba(212,69,59,0.18);
         }
 
-        /* ── Divider ── */
-        .hr-fade {
+        /* ── 分隔线 ── */
+        .hr-ink {
             border: none;
             height: 1px;
-            background: linear-gradient(to right, transparent, var(--border-subtle) 20%, var(--border-subtle) 80%, transparent);
+            background: linear-gradient(to right, transparent, var(--ink-border) 20%, var(--ink-border) 80%, transparent);
         }
 
-        /* ── Loading dots ── */
-        .loading-dots {
-            display: flex;
-            align-items: center;
-            gap: 7px;
-        }
-        .loading-dots span {
-            width: 9px;
-            height: 9px;
-            border-radius: 50%;
-            background: var(--accent);
-            animation: pulse-dot 1.4s ease-in-out infinite;
-        }
-        .loading-dots span:nth-child(2) { animation-delay: 0.18s; }
-        .loading-dots span:nth-child(3) { animation-delay: 0.36s; }
-
-        /* ── Section label ── */
-        .section-label {
-            font-size: 0.68rem;
+        /* ── 段落标题 ── */
+        .label-ink {
+            font-size: 0.66rem;
             font-weight: 600;
-            letter-spacing: 0.14em;
+            letter-spacing: 0.16em;
             text-transform: uppercase;
-            color: var(--text-muted);
-            margin-bottom: 0.45rem;
-            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+            color: var(--paper-muted);
+            margin-bottom: 0.5rem;
+            font-family: var(--font-body);
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.55rem;
         }
-        .section-label::after {
+        .label-ink::after {
             content: '';
-            display: inline-block;
+            width: 1.5rem;
             height: 1px;
-            width: 2rem;
-            background: var(--border-active);
+            background: var(--ink-border-active);
             flex-shrink: 0;
         }
 
-        /* ── Group separator (form sections) ── */
-        .form-group {
-            padding: 0.25rem 0;
-            transition: all 0.25s ease;
+        /* ── 加载动画 ── */
+        .loading-ink {
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-        .form-group + .form-group {
-            border-top: 1px solid var(--border-subtle);
-            padding-top: 1.3rem;
-            margin-top: 0.1rem;
+        .loading-ink span {
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            background: var(--cinnabar);
+            animation: breathe 1.5s ease-in-out infinite;
         }
+        .loading-ink span:nth-child(2) { animation-delay: 0.16s; }
+        .loading-ink span:nth-child(3) { animation-delay: 0.32s; }
 
-        /* ── Responsive container ── */
-        .container-narrow {
-            width: 100%;
-            max-width: 44rem;
-            margin: 0 auto;
-            padding: 0 1.25rem;
-            position: relative;
-            z-index: 1;
-        }
-
-        /* ── Back link ── */
-        .back-link {
+        /* ── 返回链接 ── */
+        .back-ink {
             display: inline-flex;
             align-items: center;
             gap: 0.35rem;
-            color: var(--text-muted);
+            color: var(--paper-muted);
             text-decoration: none;
-            font-size: 0.85rem;
+            font-size: 0.82rem;
             font-weight: 500;
-            letter-spacing: 0.03em;
+            letter-spacing: 0.04em;
             padding: 2rem 0 1rem;
             transition: all 0.22s ease;
-            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+            font-family: var(--font-body);
         }
-        .back-link:hover {
-            color: var(--text-primary);
-            gap: 0.6rem;
-        }
-        .back-link svg {
-            transition: transform 0.22s ease;
-        }
-        .back-link:hover svg {
-            transform: translateX(-3px);
-        }
+        .back-ink:hover { color: var(--paper-white); gap: 0.6rem; }
+        .back-ink svg { transition: transform 0.22s ease; }
+        .back-ink:hover svg { transform: translateX(-3px); }
 
-        /* ── Article typography ── */
+        /* ── 文章排版 ── */
         .article-title {
             font-size: 1.6rem;
             font-weight: 700;
             line-height: 1.35;
             letter-spacing: -0.01em;
-            color: var(--text-primary);
+            color: var(--paper-white);
+            font-family: var(--font-display);
         }
         .article-body {
-            color: var(--text-secondary);
-            line-height: 1.9;
+            color: var(--paper-secondary);
+            line-height: 2;
             font-size: 0.95rem;
             white-space: pre-wrap;
-            letter-spacing: 0.01em;
-            font-family: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "PingFang SC", serif;
+            letter-spacing: 0.015em;
+            font-family: var(--font-display);
         }
+        .article-body p { margin: 0.5rem 0; }
+        .article-body strong { color: var(--paper-white); font-weight: 600; }
 
-        /* ── Feature card number ── */
-        .feature-num {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--accent);
-            font-feature-settings: 'tnum';
-            min-width: 2rem;
-            font-family: "SF Mono", "Cascadia Code", "Fira Code", monospace;
-            opacity: 0.8;
-        }
-
-        /* ── Image suggestion card ── */
-        .image-card {
+        /* ── 配图卡片 ── */
+        .image-card-ink {
             display: flex;
             align-items: flex-start;
             gap: 0.9rem;
             padding: 1rem 1.2rem;
             margin: 1rem 0;
-            background: linear-gradient(135deg, rgba(138,138,160,0.06), rgba(138,138,160,0.02));
-            border: 1px dashed var(--border-active);
+            background: linear-gradient(135deg, rgba(158,154,147,0.05), rgba(158,154,147,0.02));
+            border: 1px dashed var(--ink-border-active);
             border-radius: var(--radius-md);
-            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+            font-family: var(--font-body);
             transition: border-color 0.2s;
         }
-        .image-card:hover {
-            border-color: var(--accent);
-            border-style: solid;
-        }
-        .image-card-icon {
-            font-size: 1.5rem;
-            flex-shrink: 0;
-            line-height: 1;
-        }
-        .image-card-desc {
-            color: var(--text-muted);
-            font-size: 0.85rem;
-            line-height: 1.55;
-            letter-spacing: 0.02em;
-        }
-        .image-card-desc::before {
+        .image-card-ink:hover { border-color: var(--cinnabar); border-style: solid; }
+        .image-card-ink-icon { font-size: 1.4rem; flex-shrink: 0; line-height: 1; }
+        .image-card-ink-desc { color: var(--paper-muted); font-size: 0.82rem; line-height: 1.55; }
+        .image-card-ink-desc::before {
             content: "配图建议：";
             display: block;
             font-weight: 700;
-            font-size: 0.72rem;
+            font-size: 0.7rem;
             letter-spacing: 0.1em;
             text-transform: uppercase;
-            color: var(--text-secondary);
+            color: var(--paper-secondary);
             margin-bottom: 0.25rem;
         }
 
-        /* ── Custom tag input ── */
-        .custom-tag-input {
-            font-size: 0.85rem !important;
-            padding: 0.55rem 0.9rem !important;
-            margin-top: 0.5rem;
-        }
-
-        /* ── Toggle custom button ── */
-        .toggle-custom-btn {
-            font-size: 0.76rem !important;
-            padding: 0.3rem 0.8rem !important;
-            color: var(--text-muted) !important;
-            margin-top: 0.35rem;
-            transition: color 0.2s !important;
-        }
-        .toggle-custom-btn:hover {
-            color: var(--accent) !important;
-        }
-
-        /* ── Article body paragraphs ── */
-        .article-body p {
-            margin: 0.5rem 0;
-        }
-        .article-body strong {
-            color: var(--text-primary);
-            font-weight: 600;
-        }
-
-        /* ── Stats row ── */
-        .stats-row {
+        /* ── 导航栏 ── */
+        .nav-ink {
+            position: relative;
+            z-index: 10;
+            padding: 0.5rem 0;
             display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-family: var(--font-body);
+        }
+        .nav-ink-brand {
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 0.85rem;
+            letter-spacing: 0.06em;
+            color: var(--cinnabar);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .nav-ink-brand::before {
+            content: '';
+            display: inline-block;
+            width: 6px; height: 6px;
+            background: var(--cinnabar);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--cinnabar-glow);
+        }
+        .nav-ink-right {
+            display: flex;
+            align-items: center;
             gap: 1rem;
-            padding: 0.25rem 0 0.5rem;
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+        }
+        .nav-credits {
+            font-size: 0.78rem;
+            color: var(--paper-secondary);
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 0.03em;
+        }
+        .nav-credits strong {
+            color: var(--paper-white);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        .nav-credits.credits-low strong { color: var(--cinnabar); }
+        .nav-topup {
+            font-size: 0.74rem;
+            color: var(--gold);
+            text-decoration: none;
+            border: 1px solid rgba(196,164,90,0.25);
+            padding: 0.25rem 0.75rem;
+            border-radius: 100px;
+            transition: all 0.2s;
+            font-family: var(--font-body);
+        }
+        .nav-topup:hover { background: rgba(196,164,90,0.08); border-color: var(--gold); }
+
+        /* ── 统计行 ── */
+        .stats-row-ink {
+            display: flex;
+            gap: 1.2rem;
+            font-size: 0.72rem;
+            color: var(--paper-muted);
+            font-family: var(--font-body);
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 0.04em;
             flex-wrap: wrap;
         }
-        .stats-row span {
-            letter-spacing: 0.03em;
-            font-feature-settings: 'tnum';
-        }
 
-        /* ── Trending table ── */
+        /* ── 热搜表格 ── */
         .trending-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.85rem;
-            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+            font-size: 0.83rem;
+            font-family: var(--font-body);
         }
         .trending-table thead th {
             text-align: left;
-            padding: 0.5rem 0.75rem;
-            color: var(--text-muted);
+            padding: 0.5rem 0.7rem;
+            color: var(--paper-muted);
             font-weight: 600;
-            font-size: 0.7rem;
-            letter-spacing: 0.08em;
+            font-size: 0.66rem;
+            letter-spacing: 0.1em;
             white-space: nowrap;
-            border-bottom: 1px solid var(--border-subtle);
+            border-bottom: 1px solid var(--ink-border);
+            text-transform: uppercase;
         }
         .trending-table tbody td {
-            padding: 0.65rem 0.75rem;
-            border-bottom: 1px solid var(--border-subtle);
+            padding: 0.6rem 0.7rem;
+            border-bottom: 1px solid var(--ink-border);
             transition: background 0.15s;
         }
-        .trending-table tbody tr:hover {
-            background: rgba(255,255,255,0.02);
-        }
-        .trending-table tbody tr:last-child td {
-            border-bottom: none;
-        }
-        .trending-rank-hot {
-            color: var(--accent);
-            font-weight: 700;
-            font-feature-settings: 'tnum';
-        }
-        .trending-topic-name {
-            font-weight: 600;
-            white-space: nowrap;
-            cursor: pointer;
-            transition: color 0.15s;
-        }
-        .trending-topic-name:hover {
-            color: var(--accent);
-        }
+        .trending-table tbody tr:hover { background: rgba(255,255,255,0.015); }
+        .trending-table tbody tr:last-child td { border-bottom: none; }
+        .trending-rank { color: var(--cinnabar); font-weight: 700; font-variant-numeric: tabular-nums; }
+        .trending-topic { font-weight: 600; cursor: pointer; transition: color 0.15s; }
+        .trending-topic:hover { color: var(--cinnabar); }
 
+        /* ── 响应式 ── */
         @media (min-width: 640px) {
-            .container-narrow { padding: 0 1.5rem; }
+            .container-ink { padding: 0 2rem; }
             .article-title { font-size: 1.8rem; }
             .article-body { font-size: 1rem; }
+        }
+
+        /* ── 错误/成功提示 ── */
+        .alert-cinnabar {
+            padding: 0.9rem 1.1rem;
+            border-radius: var(--radius-md);
+            background: rgba(212,69,59,0.05);
+            border: 1px solid rgba(212,69,59,0.15);
+            color: var(--cinnabar);
+            font-size: 0.85rem;
+            font-family: var(--font-body);
+        }
+        .alert-jade {
+            padding: 0.9rem 1.1rem;
+            border-radius: var(--radius-md);
+            background: var(--jade-subtle);
+            border: 1px solid rgba(107,155,122,0.15);
+            color: var(--jade);
+            font-size: 0.85rem;
+            font-family: var(--font-body);
         }
     </style>
     {% block head %}{% endblock %}
 </head>
 <body>
     {% if credits is defined %}
-    <nav style="position:relative;z-index:10;padding:0.6rem 1.25rem;display:flex;align-items:center;justify-content:flex-end;gap:1rem;border-bottom:1px solid var(--border-subtle);font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;">
-        <div style="display:flex;align-items:center;gap:0.4rem;font-size:0.82rem;color:var(--text-secondary);">
-            <span style="color:var(--text-muted);">剩余积分</span>
-            <span style="color:{% if credits > 0 %}var(--green-text){% else %}var(--accent){% endif %};font-weight:700;font-size:0.9rem;font-feature-settings:'tnum';">{{ credits }}</span>
-            <span style="color:var(--text-muted);">次</span>
-        </div>
-        <a href="/payment" style="font-size:0.78rem;color:var(--accent);text-decoration:none;border:1px solid rgba(255,36,66,0.3);padding:0.3rem 0.8rem;border-radius:100px;transition:all 0.2s;"
-           onmouseenter="this.style.background='rgba(255,36,66,0.08)'" onmouseleave="this.style.background='transparent'">
-            + 充值
-        </a>
-    </nav>
+    <div class="container-ink">
+        <nav class="nav-ink">
+            <a href="/" class="nav-ink-brand">墨染</a>
+            <div class="nav-ink-right">
+                <span class="nav-credits {% if credits == 0 %}credits-low{% endif %}">
+                    剩余 <strong>{{ credits }}</strong> 次
+                </span>
+                <a href="/payment" class="nav-topup">+ 充值</a>
+            </div>
+        </nav>
+    </div>
     {% endif %}
-    <div class="container-narrow">
+    <div class="container-ink">
         {% block content %}{% endblock %}
     </div>
-    <footer style="text-align:center;padding:2.5rem 1rem;color:var(--text-muted);font-size:0.78rem;letter-spacing:0.04em;position:relative;z-index:1;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;">
-        <p>AI 小红书爆款生成器 <span style="color:var(--border-active);margin:0 0.5rem;">·</span> 让创作更简单</p>
+    <footer style="text-align:center;padding:3rem 1rem 2rem;color:var(--paper-muted);font-size:0.72rem;letter-spacing:0.06em;position:relative;z-index:1;font-family:var(--font-body);">
+        <p>墨染 <span style="color:var(--ink-border-active);margin:0 0.5rem;">·</span> AI 小红书创作工坊</p>
     </footer>
     {% block scripts %}{% endblock %}
 </body>
