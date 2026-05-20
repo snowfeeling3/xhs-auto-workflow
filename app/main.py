@@ -4,14 +4,16 @@ import hmac
 import warnings
 warnings.filterwarnings("ignore", message=".*allowed_objects.*")
 
-from datetime import date
+from datetime import date, timedelta
 from uuid import uuid4
+from collections import defaultdict
 
 from fastapi import FastAPI, Request, Depends, Cookie, Query, Form
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from jinja2 import Environment, FileSystemLoader
 
 from app import config
@@ -364,6 +366,35 @@ def admin_payments(
     }
     total_credits = db.query(PaymentRecord).filter(PaymentRecord.status == "verified").count() * 3
 
+    # 每日趋势（最近14天）
+    fourteen_days_ago = date.today() - timedelta(days=13)
+    daily_raw = (
+        db.query(
+            func.strftime('%Y-%m-%d', PaymentRecord.created_at).label('day'),
+            PaymentRecord.status,
+            func.count(PaymentRecord.id).label('cnt')
+        )
+        .filter(func.strftime('%Y-%m-%d', PaymentRecord.created_at) >= fourteen_days_ago.isoformat())
+        .group_by('day', PaymentRecord.status)
+        .order_by('day')
+        .all()
+    )
+    daily_data = defaultdict(lambda: {"verified": 0, "pending": 0, "rejected": 0})
+    for d in daily_raw:
+        daily_data[d.day][d.status] = d.cnt
+    daily_labels = []
+    daily_verified = []
+    daily_pending = []
+    daily_rejected = []
+    day = date.today() - timedelta(days=13)
+    for i in range(14):
+        key = day.isoformat()
+        daily_labels.append(day.strftime('%m/%d'))
+        daily_verified.append(daily_data[key]["verified"])
+        daily_pending.append(daily_data[key]["pending"])
+        daily_rejected.append(daily_data[key]["rejected"])
+        day += timedelta(days=1)
+
     template = jinja_env.get_template("admin_payments.html")
     resp = HTMLResponse(template.render(
         request=request,
@@ -371,6 +402,10 @@ def admin_payments(
         counts=counts,
         total_credits=total_credits,
         status_filter=status,
+        daily_labels=daily_labels,
+        daily_verified=daily_verified,
+        daily_pending=daily_pending,
+        daily_rejected=daily_rejected,
     ))
     if key == config.ADMIN_KEY and admin_token != _admin_cookie_value():
         resp.set_cookie(key="admin_token", value=_admin_cookie_value(), max_age=8 * 3600, httponly=True, samesite="lax")

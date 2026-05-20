@@ -1,6 +1,20 @@
 {% extends "layout.html" %}
 {% block title %}付款管理 — 管理后台{% endblock %}
 
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+    .chart-container {
+        position: relative;
+        width: 100%;
+        max-height: 280px;
+    }
+    .chart-container canvas {
+        max-height: 280px;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div style="padding:2.5rem 0 1rem;">
     <a href="/" class="back-ink">
@@ -40,6 +54,22 @@
     <div class="ink-card" style="padding:1.2rem;text-align:center;">
         <div style="font-size:1.6rem;font-weight:700;font-feature-settings:'tnum';">{{ total_credits }}</div>
         <div style="font-size:0.72rem;color:var(--paper-muted);letter-spacing:0.05em;margin-top:0.25rem;font-family:var(--font-body);">累计积分</div>
+    </div>
+</div>
+
+<!-- 数据可视化图表 -->
+<div class="ink-rise ink-rise-s2" style="display:grid;grid-template-columns:1fr 2fr;gap:0.75rem;margin-bottom:1.5rem;">
+    <div class="ink-card" style="padding:1.25rem;">
+        <span class="label-ink" style="margin-bottom:0.75rem;">状态分布</span>
+        <div class="chart-container">
+            <canvas id="statusChart"></canvas>
+        </div>
+    </div>
+    <div class="ink-card" style="padding:1.25rem;">
+        <span class="label-ink" style="margin-bottom:0.75rem;">每日交易趋势（近14天）</span>
+        <div class="chart-container">
+            <canvas id="trendChart"></canvas>
+        </div>
     </div>
 </div>
 
@@ -116,4 +146,129 @@
     </div>
     {% endif %}
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function() {
+    // Ink Studio 色板
+    var jade     = '#6B9B7A';
+    var jadeBg   = 'rgba(107,155,122,0.15)';
+    var gold     = '#C4A45A';
+    var goldBg   = 'rgba(196,164,90,0.15)';
+    var cinnabar = '#D4453B';
+    var cinnabarBg = 'rgba(212,69,59,0.15)';
+    var gridColor = 'rgba(37,37,48,0.5)';
+    var textColor = '#5E5B56';
+
+    // ── 状态分布饼图 ──
+    var statusCtx = document.getElementById('statusChart').getContext('2d');
+    new Chart(statusCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['待处理', '已验证', '已拒绝'],
+            datasets: [{
+                data: [{{ counts.pending }}, {{ counts.verified }}, {{ counts.rejected }}],
+                backgroundColor: [goldBg, jadeBg, cinnabarBg],
+                borderColor: [gold, jade, cinnabar],
+                borderWidth: 2,
+                hoverBorderWidth: 3,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        color: textColor,
+                        padding: 16,
+                        font: { family: "-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif", size: 11 },
+                        usePointStyle: true,
+                        pointStyleWidth: 8,
+                    }
+                }
+            },
+            cutout: '62%',
+        }
+    });
+
+    // ── 每日趋势堆叠柱状图 ──
+    var trendCtx = document.getElementById('trendChart').getContext('2d');
+    new Chart(trendCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ daily_labels | tojson }},
+            datasets: [
+                {
+                    label: '待处理',
+                    data: {{ daily_pending | tojson }},
+                    backgroundColor: goldBg,
+                    borderColor: gold,
+                    borderWidth: 1,
+                    borderRadius: 4,
+                    borderSkipped: false,
+                },
+                {
+                    label: '已验证',
+                    data: {{ daily_verified | tojson }},
+                    backgroundColor: jadeBg,
+                    borderColor: jade,
+                    borderWidth: 1,
+                    borderRadius: 4,
+                    borderSkipped: false,
+                },
+                {
+                    label: '已拒绝',
+                    data: {{ daily_rejected | tojson }},
+                    backgroundColor: cinnabarBg,
+                    borderColor: cinnabar,
+                    borderWidth: 1,
+                    borderRadius: 4,
+                    borderSkipped: false,
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        color: textColor,
+                        padding: 16,
+                        font: { family: "-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif", size: 11 },
+                        usePointStyle: true,
+                        pointStyleWidth: 8,
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    stacked: true,
+                    grid: { display: false },
+                    ticks: { color: textColor, font: { size: 10 } }
+                },
+                y: {
+                    stacked: true,
+                    beginAtZero: true,
+                    grid: { color: gridColor },
+                    ticks: {
+                        color: textColor,
+                        font: { size: 10 },
+                        stepSize: 1,
+                        callback: function(v) { return v === Math.floor(v) ? v : ''; }
+                    }
+                }
+            },
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            }
+        }
+    });
+})();
+</script>
 {% endblock %}
